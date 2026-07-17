@@ -75,4 +75,9 @@ public class Pauta {
     public boolean sessaoEstaEncerrada() {
         return sessaoFoiAberta() && !sessaoEstaAberta();
     }
+
+    public void abrirSessao(long duracaoSegundos) {
+        this.sessaoAbertaEm = LocalDateTime.now();
+        this.sessaoFechaEm = this.sessaoAbertaEm.plusSeconds(duracaoSegundos);
+    }
 }
