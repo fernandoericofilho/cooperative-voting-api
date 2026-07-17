@@ -1801,7 +1801,7 @@ Replace the last assertion (it is intentionally awkward above) with a simpler, c
 
     private Long extractIdFromBotaoUrl(String url) {
         String[] parts = url.split("/");
-        return Long.valueOf(parts[parts.length - 2]);
+        return Long.valueOf(parts[parts.length - 3]);
     }
 }
 ```
