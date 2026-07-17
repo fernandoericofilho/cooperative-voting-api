@@ -4,7 +4,7 @@
 
 **Goal:** Build the Spring Boot REST API (Java 21) that manages cooperative voting pautas/sessions/votes, exposing both real business endpoints and the Anexo-1 server-driven screen protocol for a mobile client, backed by Postgres (docker-compose) with Flyway migrations, plus the CPF-eligibility integration, performance-oriented result counting, and API versioning.
 
-**Architecture:** Feature-packaged Spring Boot app (`pauta`, `voto`, `tela`, `external`, `common`). Controllers depend only on services; services own all business rules and return plain DTOs; repositories are plain Spring Data JPA. The Anexo-1 screen envelope (`Formulario`/`Selecao`) is a standalone, reusable DTO package built once and consumed by every screen-returning controller.
+**Architecture:** Layered package structure by technical concern (`controllers`, `controllers/request`, `services`, `services/external`, `repositories`, `models`, `dtos`, `exceptions`, `mappers`, `config`), matching this org's existing convention. Controllers depend only on services; services own all business rules and return plain DTOs/entities; mappers are the only classes that build the Anexo-1 screen envelope responses from entities; repositories are plain Spring Data JPA. The Anexo-1 screen envelope (`Formulario`/`Selecao`) is a standalone, reusable set of DTOs built once and consumed by every screen-returning controller.
 
 **Tech Stack:** Java 21, Spring Boot 3.3.x, Gradle (Kotlin DSL build script only — all app code is Java), Spring Data JPA, Flyway, PostgreSQL (docker-compose) / H2 file (local profile), Spring WebFlux `WebClient` (blocking use) for the external CPF check, springdoc-openapi, JUnit 5 + Mockito + MockMvc, k6.
 
@@ -568,11 +568,11 @@ git commit -m "feat: add abrir sessao de votacao with default duration"
 ### Task 5: Voto entity, repository, and DB-level duplicate protection
 
 **Files:**
-- Create: `src/main/java/com/sicredi/votacao/voto/OpcaoVoto.java`
-- Create: `src/main/java/com/sicredi/votacao/voto/Voto.java`
-- Create: `src/main/java/com/sicredi/votacao/voto/VotoRepository.java`
-- Create: `src/main/java/com/sicredi/votacao/voto/ContagemVoto.java`
-- Test: `src/test/java/com/sicredi/votacao/voto/VotoRepositoryTest.java`
+- Create: `src/main/java/com/sicredi/votacao/models/OpcaoVoto.java`
+- Create: `src/main/java/com/sicredi/votacao/models/Voto.java`
+- Create: `src/main/java/com/sicredi/votacao/repositories/VotoRepository.java`
+- Create: `src/main/java/com/sicredi/votacao/dtos/ContagemVoto.java`
+- Test: `src/test/java/com/sicredi/votacao/repositories/VotoRepositoryTest.java`
 
 **Interfaces:**
 - Consumes: `Pauta`/`PautaRepository` from Task 3 (to create a parent pauta id in tests).
@@ -581,7 +581,7 @@ git commit -m "feat: add abrir sessao de votacao with default duration"
 - [ ] **Step 1: Create `OpcaoVoto`**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.models;
 
 public enum OpcaoVoto {
     SIM,
@@ -592,7 +592,7 @@ public enum OpcaoVoto {
 - [ ] **Step 2: Create `Voto` entity**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -661,7 +661,7 @@ public class Voto {
 - [ ] **Step 3: Create the `ContagemVoto` projection**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.repositories;
 
 public interface ContagemVoto {
 
@@ -674,7 +674,7 @@ public interface ContagemVoto {
 - [ ] **Step 4: Create `VotoRepository`**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.repositories;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -693,13 +693,13 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
 - [ ] **Step 5: Write the failing test for the unique constraint and aggregate query**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.repositories;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.sicredi.votacao.pauta.Pauta;
-import com.sicredi.votacao.pauta.PautaRepository;
+import com.sicredi.votacao.models.Pauta;
+import com.sicredi.votacao.repositories.PautaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -757,7 +757,7 @@ Expected: PASS
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/voto src/test/java/com/sicredi/votacao/voto
+git add src/main/java/com/sicredi/votacao/models src/main/java/com/sicredi/votacao/repositories src/main/java/com/sicredi/votacao/dtos src/test/java/com/sicredi/votacao/repositories
 git commit -m "feat: add Voto entity with unique constraint and aggregate count query"
 ```
 
@@ -766,12 +766,12 @@ git commit -m "feat: add Voto entity with unique constraint and aggregate count 
 ### Task 6: Tela envelope DTOs (Anexo 1)
 
 **Files:**
-- Create: `src/main/java/com/sicredi/votacao/tela/ItemFormulario.java`
-- Create: `src/main/java/com/sicredi/votacao/tela/Botao.java`
-- Create: `src/main/java/com/sicredi/votacao/tela/TelaFormulario.java`
-- Create: `src/main/java/com/sicredi/votacao/tela/ItemSelecao.java`
-- Create: `src/main/java/com/sicredi/votacao/tela/TelaSelecao.java`
-- Test: `src/test/java/com/sicredi/votacao/tela/TelaSerializationTest.java`
+- Create: `src/main/java/com/sicredi/votacao/dtos/ItemFormulario.java`
+- Create: `src/main/java/com/sicredi/votacao/dtos/Botao.java`
+- Create: `src/main/java/com/sicredi/votacao/dtos/TelaFormulario.java`
+- Create: `src/main/java/com/sicredi/votacao/dtos/ItemSelecao.java`
+- Create: `src/main/java/com/sicredi/votacao/dtos/TelaSelecao.java`
+- Test: `src/test/java/com/sicredi/votacao/dtos/TelaSerializationTest.java`
 
 **Interfaces:**
 - Produces: `TelaFormulario`, `TelaSelecao` records serializing to the exact JSON shape from Anexo 1, reused by every controller in Tasks 11–12.
@@ -779,7 +779,7 @@ git commit -m "feat: add Voto entity with unique constraint and aggregate count 
 - [ ] **Step 1: Write the failing serialization test**
 
 ```java
-package com.sicredi.votacao.tela;
+package com.sicredi.votacao.dtos;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatJson;
@@ -837,7 +837,7 @@ Expected: FAIL — compile error, none of the tela classes exist yet.
 - [ ] **Step 3: Create `ItemFormulario`**
 
 ```java
-package com.sicredi.votacao.tela;
+package com.sicredi.votacao.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -861,7 +861,7 @@ public record ItemFormulario(String tipo, String id, String titulo, String texto
 - [ ] **Step 4: Create `Botao`**
 
 ```java
-package com.sicredi.votacao.tela;
+package com.sicredi.votacao.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Map;
@@ -874,7 +874,7 @@ public record Botao(String texto, String url, Map<String, Object> body) {
 - [ ] **Step 5: Create `TelaFormulario`**
 
 ```java
-package com.sicredi.votacao.tela;
+package com.sicredi.votacao.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
@@ -891,7 +891,7 @@ public record TelaFormulario(String tipo, String titulo, List<ItemFormulario> it
 - [ ] **Step 6: Create `ItemSelecao`**
 
 ```java
-package com.sicredi.votacao.tela;
+package com.sicredi.votacao.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Map;
@@ -908,7 +908,7 @@ public record ItemSelecao(String texto, String url, Map<String, Object> body) {
 - [ ] **Step 7: Create `TelaSelecao`**
 
 ```java
-package com.sicredi.votacao.tela;
+package com.sicredi.votacao.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
@@ -932,7 +932,7 @@ Expected: PASS
 - [ ] **Step 9: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/tela src/test/java/com/sicredi/votacao/tela
+git add src/main/java/com/sicredi/votacao/dtos src/test/java/com/sicredi/votacao/dtos
 git commit -m "feat: add Anexo 1 screen envelope DTOs"
 ```
 
@@ -941,14 +941,14 @@ git commit -m "feat: add Anexo 1 screen envelope DTOs"
 ### Task 7: VotoService business rules (with a fake CPF client)
 
 **Files:**
-- Create: `src/main/java/com/sicredi/votacao/external/UserInfoClient.java`
-- Create: `src/main/java/com/sicredi/votacao/external/StatusVotacao.java`
-- Create: `src/main/java/com/sicredi/votacao/voto/SessaoNaoAbertaException.java`
-- Create: `src/main/java/com/sicredi/votacao/voto/SessaoEncerradaException.java`
-- Create: `src/main/java/com/sicredi/votacao/voto/VotoDuplicadoException.java`
-- Create: `src/main/java/com/sicredi/votacao/voto/AssociadoNaoHabilitadoException.java`
-- Create: `src/main/java/com/sicredi/votacao/voto/VotoService.java`
-- Test: `src/test/java/com/sicredi/votacao/voto/VotoServiceTest.java`
+- Create: `src/main/java/com/sicredi/votacao/services/external/UserInfoClient.java`
+- Create: `src/main/java/com/sicredi/votacao/services/external/StatusVotacao.java`
+- Create: `src/main/java/com/sicredi/votacao/exceptions/SessaoNaoAbertaException.java`
+- Create: `src/main/java/com/sicredi/votacao/exceptions/SessaoEncerradaException.java`
+- Create: `src/main/java/com/sicredi/votacao/exceptions/VotoDuplicadoException.java`
+- Create: `src/main/java/com/sicredi/votacao/exceptions/AssociadoNaoHabilitadoException.java`
+- Create: `src/main/java/com/sicredi/votacao/services/VotoService.java`
+- Test: `src/test/java/com/sicredi/votacao/services/VotoServiceTest.java`
 
 **Interfaces:**
 - Consumes: `Pauta`/`PautaService.buscarPorId` (Task 3/4), `Voto`/`VotoRepository` (Task 5), `UserInfoClient.consultar(String cpf)` returning `StatusVotacao` (interface only here — real implementation is Task 8).
@@ -957,7 +957,7 @@ git commit -m "feat: add Anexo 1 screen envelope DTOs"
 - [ ] **Step 1: Create `StatusVotacao`**
 
 ```java
-package com.sicredi.votacao.external;
+package com.sicredi.votacao.services;
 
 public enum StatusVotacao {
     ABLE_TO_VOTE,
@@ -968,7 +968,7 @@ public enum StatusVotacao {
 - [ ] **Step 2: Create the `UserInfoClient` interface**
 
 ```java
-package com.sicredi.votacao.external;
+package com.sicredi.votacao.services;
 
 public interface UserInfoClient {
 
@@ -979,7 +979,7 @@ public interface UserInfoClient {
 - [ ] **Step 3: Create the four voto exceptions**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.services;
 
 public class SessaoNaoAbertaException extends RuntimeException {
 
@@ -990,7 +990,7 @@ public class SessaoNaoAbertaException extends RuntimeException {
 ```
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.services;
 
 public class SessaoEncerradaException extends RuntimeException {
 
@@ -1001,7 +1001,7 @@ public class SessaoEncerradaException extends RuntimeException {
 ```
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.services;
 
 public class VotoDuplicadoException extends RuntimeException {
 
@@ -1012,7 +1012,7 @@ public class VotoDuplicadoException extends RuntimeException {
 ```
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.services;
 
 public class AssociadoNaoHabilitadoException extends RuntimeException {
 
@@ -1025,17 +1025,17 @@ public class AssociadoNaoHabilitadoException extends RuntimeException {
 - [ ] **Step 4: Write the failing unit tests with a mocked `UserInfoClient`**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.sicredi.votacao.external.StatusVotacao;
-import com.sicredi.votacao.external.UserInfoClient;
-import com.sicredi.votacao.pauta.Pauta;
-import com.sicredi.votacao.pauta.PautaService;
+import com.sicredi.votacao.services.external.StatusVotacao;
+import com.sicredi.votacao.services.external.UserInfoClient;
+import com.sicredi.votacao.models.Pauta;
+import com.sicredi.votacao.services.PautaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -1128,12 +1128,12 @@ Expected: FAIL — compile error, `VotoService` does not exist.
 - [ ] **Step 6: Create `VotoService`**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.services;
 
-import com.sicredi.votacao.external.StatusVotacao;
-import com.sicredi.votacao.external.UserInfoClient;
-import com.sicredi.votacao.pauta.Pauta;
-import com.sicredi.votacao.pauta.PautaService;
+import com.sicredi.votacao.services.external.StatusVotacao;
+import com.sicredi.votacao.services.external.UserInfoClient;
+import com.sicredi.votacao.models.Pauta;
+import com.sicredi.votacao.services.PautaService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -1178,7 +1178,7 @@ Expected: PASS (all 5 tests)
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/external src/main/java/com/sicredi/votacao/voto src/test/java/com/sicredi/votacao/voto
+git add src/main/java/com/sicredi/votacao/services src/main/java/com/sicredi/votacao/exceptions src/test/java/com/sicredi/votacao/services
 git commit -m "feat: add VotoService business rules"
 ```
 
@@ -1187,10 +1187,10 @@ git commit -m "feat: add VotoService business rules"
 ### Task 8: Real UserInfoClient (WebClient, timeout, retry, 404 mapping)
 
 **Files:**
-- Create: `src/main/java/com/sicredi/votacao/external/CpfInvalidoException.java`
-- Create: `src/main/java/com/sicredi/votacao/external/IntegracaoExternaIndisponivelException.java`
-- Create: `src/main/java/com/sicredi/votacao/external/WebClientUserInfoClient.java`
-- Test: `src/test/java/com/sicredi/votacao/external/WebClientUserInfoClientTest.java`
+- Create: `src/main/java/com/sicredi/votacao/exceptions/CpfInvalidoException.java`
+- Create: `src/main/java/com/sicredi/votacao/exceptions/IntegracaoExternaIndisponivelException.java`
+- Create: `src/main/java/com/sicredi/votacao/services/external/WebClientUserInfoClient.java`
+- Test: `src/test/java/com/sicredi/votacao/services/external/WebClientUserInfoClientTest.java`
 
 **Interfaces:**
 - Consumes: `UserInfoClient`, `StatusVotacao` from Task 7.
@@ -1199,7 +1199,7 @@ git commit -m "feat: add VotoService business rules"
 - [ ] **Step 1: Create the two exceptions**
 
 ```java
-package com.sicredi.votacao.external;
+package com.sicredi.votacao.services.external;
 
 public class CpfInvalidoException extends RuntimeException {
 
@@ -1210,7 +1210,7 @@ public class CpfInvalidoException extends RuntimeException {
 ```
 
 ```java
-package com.sicredi.votacao.external;
+package com.sicredi.votacao.services.external;
 
 public class IntegracaoExternaIndisponivelException extends RuntimeException {
 
@@ -1223,7 +1223,7 @@ public class IntegracaoExternaIndisponivelException extends RuntimeException {
 - [ ] **Step 2: Write the failing test using MockWebServer**
 
 ```java
-package com.sicredi.votacao.external;
+package com.sicredi.votacao.services.external;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -1300,7 +1300,7 @@ Expected: FAIL — compile error, `WebClientUserInfoClient` does not exist.
 - [ ] **Step 4: Create `WebClientUserInfoClient`**
 
 ```java
-package com.sicredi.votacao.external;
+package com.sicredi.votacao.services.external;
 
 import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
@@ -1374,7 +1374,7 @@ Expected: PASS (still uses the mocked `UserInfoClient` interface, unaffected)
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/external src/main/resources/application.yml src/test/java/com/sicredi/votacao/external
+git add src/main/java/com/sicredi/votacao/exceptions src/main/java/com/sicredi/votacao/services/external src/main/resources/application.yml src/test/java/com/sicredi/votacao/services/external
 git commit -m "feat: add WebClient-based CPF eligibility integration with retry and timeout"
 ```
 
@@ -1383,9 +1383,9 @@ git commit -m "feat: add WebClient-based CPF eligibility integration with retry 
 ### Task 9: Apuração de resultado
 
 **Files:**
-- Create: `src/main/java/com/sicredi/votacao/pauta/ResultadoPauta.java`
-- Modify: `src/main/java/com/sicredi/votacao/pauta/PautaService.java`
-- Test: `src/test/java/com/sicredi/votacao/pauta/PautaServiceTest.java`
+- Create: `src/main/java/com/sicredi/votacao/dtos/ResultadoPauta.java`
+- Modify: `src/main/java/com/sicredi/votacao/services/PautaService.java`
+- Test: `src/test/java/com/sicredi/votacao/services/PautaServiceTest.java`
 
 **Interfaces:**
 - Consumes: `VotoRepository.contarPorPauta` (Task 5), `PautaService.buscarPorId` (Task 3).
@@ -1394,7 +1394,7 @@ git commit -m "feat: add WebClient-based CPF eligibility integration with retry 
 - [ ] **Step 1: Create `ResultadoPauta`**
 
 ```java
-package com.sicredi.votacao.pauta;
+package com.sicredi.votacao.dtos;
 
 public record ResultadoPauta(long votosSim, long votosNao, String resultado) {
 
@@ -1418,14 +1418,14 @@ Append to `PautaServiceTest` (add `VotoRepository` and a helper to insert votes 
 
 ```java
     @Autowired
-    private com.sicredi.votacao.voto.VotoRepository votoRepository;
+    private com.sicredi.votacao.repositories.VotoRepository votoRepository;
 
     @Test
     void apurarResultadoContabilizaVotosEDefineAprovada() {
         Pauta pauta = pautaService.criarPauta("Pauta Resultado", "desc");
-        votoRepository.save(new com.sicredi.votacao.voto.Voto(pauta.getId(), "11111111111", com.sicredi.votacao.voto.OpcaoVoto.SIM));
-        votoRepository.save(new com.sicredi.votacao.voto.Voto(pauta.getId(), "22222222222", com.sicredi.votacao.voto.OpcaoVoto.SIM));
-        votoRepository.save(new com.sicredi.votacao.voto.Voto(pauta.getId(), "33333333333", com.sicredi.votacao.voto.OpcaoVoto.NAO));
+        votoRepository.save(new com.sicredi.votacao.models.Voto(pauta.getId(), "11111111111", com.sicredi.votacao.models.OpcaoVoto.SIM));
+        votoRepository.save(new com.sicredi.votacao.models.Voto(pauta.getId(), "22222222222", com.sicredi.votacao.models.OpcaoVoto.SIM));
+        votoRepository.save(new com.sicredi.votacao.models.Voto(pauta.getId(), "33333333333", com.sicredi.votacao.models.OpcaoVoto.NAO));
 
         ResultadoPauta resultado = pautaService.apurarResultado(pauta.getId());
 
@@ -1464,7 +1464,7 @@ Modify the constructor and add the method:
     }
 ```
 
-(Add the import `com.sicredi.votacao.voto.VotoRepository`, `com.sicredi.votacao.voto.OpcaoVoto`, `com.sicredi.votacao.voto.ContagemVoto`.)
+(Add the import `com.sicredi.votacao.repositories.VotoRepository`, `com.sicredi.votacao.models.OpcaoVoto`, `com.sicredi.votacao.dtos.ContagemVoto`.)
 
 ```java
     public ResultadoPauta apurarResultado(Long pautaId) {
@@ -1490,7 +1490,7 @@ Expected: PASS (all tests in the class)
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/pauta src/test/java/com/sicredi/votacao/pauta
+git add src/main/java/com/sicredi/votacao/dtos src/main/java/com/sicredi/votacao/services src/test/java/com/sicredi/votacao/services
 git commit -m "feat: add resultado apuration via aggregate count query"
 ```
 
@@ -1499,9 +1499,9 @@ git commit -m "feat: add resultado apuration via aggregate count query"
 ### Task 10: GlobalExceptionHandler
 
 **Files:**
-- Create: `src/main/java/com/sicredi/votacao/common/ErrorResponse.java`
-- Create: `src/main/java/com/sicredi/votacao/common/GlobalExceptionHandler.java`
-- Test: `src/test/java/com/sicredi/votacao/common/GlobalExceptionHandlerTest.java`
+- Create: `src/main/java/com/sicredi/votacao/exceptions/ErrorResponse.java`
+- Create: `src/main/java/com/sicredi/votacao/exceptions/GlobalExceptionHandler.java`
+- Test: `src/test/java/com/sicredi/votacao/exceptions/GlobalExceptionHandlerTest.java`
 
 **Interfaces:**
 - Consumes: every domain exception created in Tasks 3, 4, 7, 8.
@@ -1510,7 +1510,7 @@ git commit -m "feat: add resultado apuration via aggregate count query"
 - [ ] **Step 1: Create `ErrorResponse`**
 
 ```java
-package com.sicredi.votacao.common;
+package com.sicredi.votacao.exceptions;
 
 import java.time.LocalDateTime;
 
@@ -1525,18 +1525,18 @@ public record ErrorResponse(LocalDateTime timestamp, int status, String error, S
 - [ ] **Step 2: Write the failing test**
 
 ```java
-package com.sicredi.votacao.common;
+package com.sicredi.votacao.exceptions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.sicredi.votacao.pauta.PautaNaoEncontradaException;
-import com.sicredi.votacao.pauta.SessaoJaAbertaException;
-import com.sicredi.votacao.voto.AssociadoNaoHabilitadoException;
-import com.sicredi.votacao.voto.SessaoEncerradaException;
-import com.sicredi.votacao.voto.SessaoNaoAbertaException;
-import com.sicredi.votacao.voto.VotoDuplicadoException;
-import com.sicredi.votacao.external.CpfInvalidoException;
-import com.sicredi.votacao.external.IntegracaoExternaIndisponivelException;
+import com.sicredi.votacao.exceptions.PautaNaoEncontradaException;
+import com.sicredi.votacao.exceptions.SessaoJaAbertaException;
+import com.sicredi.votacao.exceptions.AssociadoNaoHabilitadoException;
+import com.sicredi.votacao.exceptions.SessaoEncerradaException;
+import com.sicredi.votacao.exceptions.SessaoNaoAbertaException;
+import com.sicredi.votacao.exceptions.VotoDuplicadoException;
+import com.sicredi.votacao.exceptions.CpfInvalidoException;
+import com.sicredi.votacao.exceptions.IntegracaoExternaIndisponivelException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -1572,16 +1572,16 @@ Expected: FAIL — compile error, `GlobalExceptionHandler` does not exist.
 - [ ] **Step 4: Create `GlobalExceptionHandler`**
 
 ```java
-package com.sicredi.votacao.common;
+package com.sicredi.votacao.exceptions;
 
-import com.sicredi.votacao.external.CpfInvalidoException;
-import com.sicredi.votacao.external.IntegracaoExternaIndisponivelException;
-import com.sicredi.votacao.pauta.PautaNaoEncontradaException;
-import com.sicredi.votacao.pauta.SessaoJaAbertaException;
-import com.sicredi.votacao.voto.AssociadoNaoHabilitadoException;
-import com.sicredi.votacao.voto.SessaoEncerradaException;
-import com.sicredi.votacao.voto.SessaoNaoAbertaException;
-import com.sicredi.votacao.voto.VotoDuplicadoException;
+import com.sicredi.votacao.exceptions.CpfInvalidoException;
+import com.sicredi.votacao.exceptions.IntegracaoExternaIndisponivelException;
+import com.sicredi.votacao.exceptions.PautaNaoEncontradaException;
+import com.sicredi.votacao.exceptions.SessaoJaAbertaException;
+import com.sicredi.votacao.exceptions.AssociadoNaoHabilitadoException;
+import com.sicredi.votacao.exceptions.SessaoEncerradaException;
+import com.sicredi.votacao.exceptions.SessaoNaoAbertaException;
+import com.sicredi.votacao.exceptions.VotoDuplicadoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -1645,7 +1645,7 @@ Expected: PASS
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/common src/test/java/com/sicredi/votacao/common
+git add src/main/java/com/sicredi/votacao/exceptions src/test/java/com/sicredi/votacao/exceptions
 git commit -m "feat: add global exception handler mapping domain errors to HTTP status"
 ```
 
@@ -1654,23 +1654,23 @@ git commit -m "feat: add global exception handler mapping domain errors to HTTP 
 ### Task 11: Real action controllers (Pauta, Sessão, Voto, Resultado)
 
 **Files:**
-- Create: `src/main/java/com/sicredi/votacao/pauta/CriarPautaRequest.java`
-- Create: `src/main/java/com/sicredi/votacao/pauta/AbrirSessaoRequest.java`
-- Create: `src/main/java/com/sicredi/votacao/pauta/PautaTelaAssembler.java`
-- Create: `src/main/java/com/sicredi/votacao/pauta/PautaController.java`
-- Create: `src/main/java/com/sicredi/votacao/voto/RegistrarVotoRequest.java`
-- Create: `src/main/java/com/sicredi/votacao/voto/VotoController.java`
-- Test: `src/test/java/com/sicredi/votacao/pauta/PautaControllerTest.java`
-- Test: `src/test/java/com/sicredi/votacao/voto/VotoControllerTest.java`
+- Create: `src/main/java/com/sicredi/votacao/controllers/request/CriarPautaRequest.java`
+- Create: `src/main/java/com/sicredi/votacao/controllers/request/AbrirSessaoRequest.java`
+- Create: `src/main/java/com/sicredi/votacao/mappers/PautaTelaMapper.java`
+- Create: `src/main/java/com/sicredi/votacao/controllers/PautaController.java`
+- Create: `src/main/java/com/sicredi/votacao/controllers/request/RegistrarVotoRequest.java`
+- Create: `src/main/java/com/sicredi/votacao/controllers/VotoController.java`
+- Test: `src/test/java/com/sicredi/votacao/controllers/PautaControllerTest.java`
+- Test: `src/test/java/com/sicredi/votacao/controllers/VotoControllerTest.java`
 
 **Interfaces:**
 - Consumes: `PautaService` (Tasks 3/4/9), `VotoService` (Task 7), `TelaFormulario`/`ItemFormulario`/`Botao` (Task 6).
-- Produces: `PautaTelaAssembler.detalhe(Pauta)` returning `TelaFormulario` (state-dependent `botaoOk`, reused by Task 12's navigation controllers); real endpoints `POST /api/v1/pautas`, `POST /api/v1/pautas/{id}/sessoes`, `POST /api/v1/pautas/{id}/votos`, `POST /api/v1/pautas/{id}/resultado`.
+- Produces: `PautaTelaMapper.detalhe(Pauta)` returning `TelaFormulario` (state-dependent `botaoOk`, reused by Task 12's navigation controllers); real endpoints `POST /api/v1/pautas`, `POST /api/v1/pautas/{id}/sessoes`, `POST /api/v1/pautas/{id}/votos`, `POST /api/v1/pautas/{id}/resultado`.
 
 - [ ] **Step 1: Create the request DTOs**
 
 ```java
-package com.sicredi.votacao.pauta;
+package com.sicredi.votacao.controllers;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -1679,14 +1679,14 @@ public record CriarPautaRequest(@NotBlank String titulo, String descricao) {
 ```
 
 ```java
-package com.sicredi.votacao.pauta;
+package com.sicredi.votacao.controllers;
 
 public record AbrirSessaoRequest(Long duracaoSegundos) {
 }
 ```
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.controllers;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -1701,7 +1701,7 @@ public record RegistrarVotoRequest(
 - [ ] **Step 2: Write the failing controller tests**
 
 ```java
-package com.sicredi.votacao.pauta;
+package com.sicredi.votacao.controllers;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -1785,22 +1785,22 @@ Replace the last assertion (it is intentionally awkward above) with a simpler, c
 - [ ] **Step 3: Run tests to verify they fail**
 
 Run: `./gradlew test --tests PautaControllerTest -Dspring.profiles.active=local`
-Expected: FAIL — compile error, `PautaController`/`PautaTelaAssembler` do not exist.
+Expected: FAIL — compile error, `PautaController`/`PautaTelaMapper` do not exist.
 
-- [ ] **Step 4: Create `PautaTelaAssembler`**
+- [ ] **Step 4: Create `PautaTelaMapper`**
 
 ```java
-package com.sicredi.votacao.pauta;
+package com.sicredi.votacao.mappers;
 
-import com.sicredi.votacao.tela.Botao;
-import com.sicredi.votacao.tela.ItemFormulario;
-import com.sicredi.votacao.tela.TelaFormulario;
+import com.sicredi.votacao.dtos.Botao;
+import com.sicredi.votacao.dtos.ItemFormulario;
+import com.sicredi.votacao.dtos.TelaFormulario;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PautaTelaAssembler {
+public class PautaTelaMapper {
 
     public TelaFormulario detalhe(Pauta pauta) {
         List<ItemFormulario> itens = List.of(
@@ -1843,9 +1843,9 @@ public class PautaTelaAssembler {
 - [ ] **Step 5: Create `PautaController`**
 
 ```java
-package com.sicredi.votacao.pauta;
+package com.sicredi.votacao.controllers;
 
-import com.sicredi.votacao.tela.TelaFormulario;
+import com.sicredi.votacao.dtos.TelaFormulario;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -1858,36 +1858,36 @@ import org.springframework.web.bind.annotation.RestController;
 public class PautaController {
 
     private final PautaService pautaService;
-    private final PautaTelaAssembler pautaTelaAssembler;
+    private final PautaTelaMapper pautaTelaMapper;
 
-    public PautaController(PautaService pautaService, PautaTelaAssembler pautaTelaAssembler) {
+    public PautaController(PautaService pautaService, PautaTelaMapper pautaTelaMapper) {
         this.pautaService = pautaService;
-        this.pautaTelaAssembler = pautaTelaAssembler;
+        this.pautaTelaMapper = pautaTelaMapper;
     }
 
     @PostMapping
     public TelaFormulario criar(@Valid @RequestBody CriarPautaRequest request) {
         Pauta pauta = pautaService.criarPauta(request.titulo(), request.descricao());
-        return pautaTelaAssembler.detalhe(pauta);
+        return pautaTelaMapper.detalhe(pauta);
     }
 
     @PostMapping("/{id}")
     public TelaFormulario detalhe(@PathVariable Long id) {
-        return pautaTelaAssembler.detalhe(pautaService.buscarPorId(id));
+        return pautaTelaMapper.detalhe(pautaService.buscarPorId(id));
     }
 
     @PostMapping("/{id}/sessoes")
     public TelaFormulario abrirSessao(@PathVariable Long id, @RequestBody(required = false) AbrirSessaoRequest request) {
         Long duracao = request != null ? request.duracaoSegundos() : null;
         Pauta pauta = pautaService.abrirSessao(id, duracao);
-        return pautaTelaAssembler.detalhe(pauta);
+        return pautaTelaMapper.detalhe(pauta);
     }
 
     @PostMapping("/{id}/resultado")
     public TelaFormulario resultado(@PathVariable Long id) {
         Pauta pauta = pautaService.buscarPorId(id);
         ResultadoPauta resultado = pautaService.apurarResultado(id);
-        return pautaTelaAssembler.resultado(pauta, resultado);
+        return pautaTelaMapper.resultado(pauta, resultado);
     }
 }
 ```
@@ -1895,11 +1895,11 @@ public class PautaController {
 - [ ] **Step 6: Create `VotoController`**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.controllers;
 
-import com.sicredi.votacao.tela.Botao;
-import com.sicredi.votacao.tela.ItemFormulario;
-import com.sicredi.votacao.tela.TelaFormulario;
+import com.sicredi.votacao.dtos.Botao;
+import com.sicredi.votacao.dtos.ItemFormulario;
+import com.sicredi.votacao.dtos.TelaFormulario;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -1940,13 +1940,13 @@ Expected: PASS
 - [ ] **Step 9: Write and run `VotoControllerTest`**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.controllers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sicredi.votacao.pauta.PautaService;
+import com.sicredi.votacao.services.PautaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -1956,8 +1956,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.sicredi.votacao.external.StatusVotacao;
-import com.sicredi.votacao.external.UserInfoClient;
+import com.sicredi.votacao.services.external.StatusVotacao;
+import com.sicredi.votacao.services.external.UserInfoClient;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -1997,7 +1997,7 @@ Expected: PASS
 - [ ] **Step 10: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/pauta src/main/java/com/sicredi/votacao/voto src/test/java/com/sicredi/votacao/pauta src/test/java/com/sicredi/votacao/voto
+git add src/main/java/com/sicredi/votacao/controllers src/main/java/com/sicredi/votacao/mappers src/test/java/com/sicredi/votacao/controllers
 git commit -m "feat: add real action controllers returning Anexo 1 screen envelopes"
 ```
 
@@ -2006,22 +2006,22 @@ git commit -m "feat: add real action controllers returning Anexo 1 screen envelo
 ### Task 12: Navigation screen controllers (Tela)
 
 **Files:**
-- Create: `src/main/java/com/sicredi/votacao/tela/TelaController.java`
-- Create: `src/main/java/com/sicredi/votacao/pauta/CpfFormularioRequest.java` (moved conceptually into voto; see Step 2 note)
-- Create: `src/main/java/com/sicredi/votacao/voto/VotoTelaController.java`
-- Test: `src/test/java/com/sicredi/votacao/tela/TelaControllerTest.java`
-- Test: `src/test/java/com/sicredi/votacao/voto/VotoTelaControllerTest.java`
+- Create: `src/main/java/com/sicredi/votacao/controllers/TelaController.java`
+- Create: `src/main/java/com/sicredi/votacao/controllers/request/CpfFormularioRequest.java` (see Step 1 note)
+- Create: `src/main/java/com/sicredi/votacao/controllers/VotoTelaController.java`
+- Test: `src/test/java/com/sicredi/votacao/controllers/TelaControllerTest.java`
+- Test: `src/test/java/com/sicredi/votacao/controllers/VotoTelaControllerTest.java`
 
 **Interfaces:**
-- Consumes: `PautaService` (Task 3/4), `PautaTelaAssembler` (Task 11), `TelaFormulario`/`TelaSelecao`/`ItemSelecao`/`Botao` (Task 6).
+- Consumes: `PautaService` (Task 3/4), `PautaTelaMapper` (Task 11), `TelaFormulario`/`TelaSelecao`/`ItemSelecao`/`Botao` (Task 6).
 - Produces: `GET /api/v1/telas/home`, `POST /api/v1/telas/pautas/novo`, `POST /api/v1/telas/pautas`, `POST /api/v1/pautas/{id}/sessoes/tela`, `POST /api/v1/pautas/{id}/votos/tela`, `POST /api/v1/pautas/{id}/votos/opcoes`.
 
-- [ ] **Step 1: Discard the misnamed file from the header** — do not create `CpfFormularioRequest` in the `pauta` package; the correct file is `src/main/java/com/sicredi/votacao/voto/CpfFormularioRequest.java` (corrected below).
+- [ ] **Step 1: Discard the misnamed file from the header** — do not create `CpfFormularioRequest` outside `controllers/request`; the correct file is `src/main/java/com/sicredi/votacao/controllers/request/CpfFormularioRequest.java` (corrected below).
 
 - [ ] **Step 2: Write the failing test for `TelaController`**
 
 ```java
-package com.sicredi.votacao.tela;
+package com.sicredi.votacao.controllers;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -2077,10 +2077,10 @@ Expected: FAIL — compile error, `TelaController` does not exist.
 - [ ] **Step 4: Create `TelaController`**
 
 ```java
-package com.sicredi.votacao.tela;
+package com.sicredi.votacao.controllers;
 
-import com.sicredi.votacao.pauta.Pauta;
-import com.sicredi.votacao.pauta.PautaService;
+import com.sicredi.votacao.models.Pauta;
+import com.sicredi.votacao.services.PautaService;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -2147,7 +2147,7 @@ Expected: PASS
 - [ ] **Step 7: Write the failing test for the voto navigation screens**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.controllers;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -2155,7 +2155,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sicredi.votacao.pauta.PautaService;
+import com.sicredi.votacao.services.PautaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -2206,12 +2206,12 @@ class VotoTelaControllerTest {
 - [ ] **Step 8: Run test to verify it fails**
 
 Run: `./gradlew test --tests VotoTelaControllerTest -Dspring.profiles.active=local`
-Expected: FAIL — compile error, `VotoTelaController`/`CpfFormularioRequest` do not exist. Also update `PautaTelaAssembler`'s `/sessoes/tela` path was already covered in Task 11; this task adds the analogous `/votos/tela` screen.
+Expected: FAIL — compile error, `VotoTelaController`/`CpfFormularioRequest` do not exist. Also update `PautaTelaMapper`'s `/sessoes/tela` path was already covered in Task 11; this task adds the analogous `/votos/tela` screen.
 
 - [ ] **Step 9: Create `CpfFormularioRequest`**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.controllers;
 
 public record CpfFormularioRequest(String cpfAssociado) {
 }
@@ -2220,13 +2220,13 @@ public record CpfFormularioRequest(String cpfAssociado) {
 - [ ] **Step 10: Create `VotoTelaController`**
 
 ```java
-package com.sicredi.votacao.voto;
+package com.sicredi.votacao.controllers;
 
-import com.sicredi.votacao.tela.Botao;
-import com.sicredi.votacao.tela.ItemFormulario;
-import com.sicredi.votacao.tela.ItemSelecao;
-import com.sicredi.votacao.tela.TelaFormulario;
-import com.sicredi.votacao.tela.TelaSelecao;
+import com.sicredi.votacao.dtos.Botao;
+import com.sicredi.votacao.dtos.ItemFormulario;
+import com.sicredi.votacao.dtos.ItemSelecao;
+import com.sicredi.votacao.dtos.TelaFormulario;
+import com.sicredi.votacao.dtos.TelaSelecao;
 import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -2271,7 +2271,7 @@ Expected: PASS (all tests across all packages)
 - [ ] **Step 13: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/tela src/main/java/com/sicredi/votacao/voto src/main/java/com/sicredi/votacao/pauta src/test/java/com/sicredi/votacao/tela src/test/java/com/sicredi/votacao/voto
+git add src/main/java/com/sicredi/votacao/controllers src/main/java/com/sicredi/votacao/services src/test/java/com/sicredi/votacao/controllers
 git commit -m "feat: add screen navigation controllers completing the Anexo 1 flow"
 ```
 
@@ -2280,8 +2280,8 @@ git commit -m "feat: add screen navigation controllers completing the Anexo 1 fl
 ### Task 13: OpenAPI / Swagger UI
 
 **Files:**
-- Create: `src/main/java/com/sicredi/votacao/common/OpenApiConfig.java`
-- Test: `src/test/java/com/sicredi/votacao/common/OpenApiConfigTest.java`
+- Create: `src/main/java/com/sicredi/votacao/config/OpenApiConfig.java`
+- Test: `src/test/java/com/sicredi/votacao/config/OpenApiConfigTest.java`
 
 **Interfaces:**
 - Consumes: nothing new (springdoc-openapi dependency already in `build.gradle.kts` from Task 1).
@@ -2290,7 +2290,7 @@ git commit -m "feat: add screen navigation controllers completing the Anexo 1 fl
 - [ ] **Step 1: Write the failing test**
 
 ```java
-package com.sicredi.votacao.common;
+package com.sicredi.votacao.config;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -2326,7 +2326,7 @@ Expected: PASS already (springdoc auto-configures `/v3/api-docs` out of the box)
 - [ ] **Step 3: Create `OpenApiConfig` to customize metadata**
 
 ```java
-package com.sicredi.votacao.common;
+package com.sicredi.votacao.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -2354,7 +2354,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/common src/test/java/com/sicredi/votacao/common
+git add src/main/java/com/sicredi/votacao/config src/test/java/com/sicredi/votacao/config
 git commit -m "feat: customize OpenAPI metadata for Swagger UI"
 ```
 
@@ -2639,9 +2639,9 @@ git commit -m "docs: add README with run instructions and design rationale"
 ### Task 17: Structured logging
 
 **Files:**
-- Modify: `src/main/java/com/sicredi/votacao/pauta/PautaService.java`
-- Modify: `src/main/java/com/sicredi/votacao/voto/VotoService.java`
-- Modify: `src/main/java/com/sicredi/votacao/common/GlobalExceptionHandler.java`
+- Modify: `src/main/java/com/sicredi/votacao/services/PautaService.java`
+- Modify: `src/main/java/com/sicredi/votacao/services/VotoService.java`
+- Modify: `src/main/java/com/sicredi/votacao/exceptions/GlobalExceptionHandler.java`
 
 **Interfaces:**
 - Consumes: existing services/handler from Tasks 3, 4, 7, 9, 10.
@@ -2709,7 +2709,7 @@ Expected: console shows `action=create_pauta status=ok id=<n>`.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/pauta src/main/java/com/sicredi/votacao/voto src/main/java/com/sicredi/votacao/common
+git add src/main/java/com/sicredi/votacao/services src/main/java/com/sicredi/votacao/exceptions
 git commit -m "feat: add structured action/status logging to services and error handler"
 ```
 
