@@ -1873,7 +1873,11 @@ package com.sicredi.votacao.controllers;
 
 import com.sicredi.votacao.controllers.request.AbrirSessaoRequest;
 import com.sicredi.votacao.controllers.request.CriarPautaRequest;
+import com.sicredi.votacao.dtos.ResultadoPauta;
 import com.sicredi.votacao.dtos.TelaFormulario;
+import com.sicredi.votacao.mappers.PautaTelaMapper;
+import com.sicredi.votacao.models.Pauta;
+import com.sicredi.votacao.services.PautaService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -1929,6 +1933,8 @@ import com.sicredi.votacao.controllers.request.RegistrarVotoRequest;
 import com.sicredi.votacao.dtos.Botao;
 import com.sicredi.votacao.dtos.ItemFormulario;
 import com.sicredi.votacao.dtos.TelaFormulario;
+import com.sicredi.votacao.models.OpcaoVoto;
+import com.sicredi.votacao.services.VotoService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -1986,7 +1992,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.sicredi.votacao.services.external.StatusVotacao;
+import com.sicredi.votacao.dtos.StatusVotacao;
 import com.sicredi.votacao.services.external.UserInfoClient;
 import static org.mockito.Mockito.when;
 
