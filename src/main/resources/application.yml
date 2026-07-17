@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: cooperative-voting-api
+  profiles:
+    active: default
+
+app:
+  external:
+    user-info-url: https://user-info.herokuapp.com
+    timeout-seconds: 3
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
