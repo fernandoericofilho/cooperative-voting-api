@@ -1,4 +1,4 @@
-package com.sicredi.votacao.pauta;
+package com.sicredi.votacao.exceptions;
 
 public class SessaoJaAbertaException extends RuntimeException {
 

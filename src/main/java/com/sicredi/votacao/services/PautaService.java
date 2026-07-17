@@ -1,5 +1,9 @@
-package com.sicredi.votacao.pauta;
+package com.sicredi.votacao.services;
 
+import com.sicredi.votacao.exceptions.PautaNaoEncontradaException;
+import com.sicredi.votacao.exceptions.SessaoJaAbertaException;
+import com.sicredi.votacao.models.Pauta;
+import com.sicredi.votacao.repositories.PautaRepository;
 import org.springframework.stereotype.Service;
 
 @Service

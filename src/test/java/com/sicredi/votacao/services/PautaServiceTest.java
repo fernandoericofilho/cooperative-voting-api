@@ -1,8 +1,11 @@
-package com.sicredi.votacao.pauta;
+package com.sicredi.votacao.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.sicredi.votacao.exceptions.PautaNaoEncontradaException;
+import com.sicredi.votacao.exceptions.SessaoJaAbertaException;
+import com.sicredi.votacao.models.Pauta;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
