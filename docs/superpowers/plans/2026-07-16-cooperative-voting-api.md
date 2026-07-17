@@ -1213,7 +1213,7 @@ git commit -m "feat: add VotoService business rules"
 - [ ] **Step 1: Create the two exceptions**
 
 ```java
-package com.sicredi.votacao.services.external;
+package com.sicredi.votacao.exceptions;
 
 public class CpfInvalidoException extends RuntimeException {
 
@@ -1224,7 +1224,7 @@ public class CpfInvalidoException extends RuntimeException {
 ```
 
 ```java
-package com.sicredi.votacao.services.external;
+package com.sicredi.votacao.exceptions;
 
 public class IntegracaoExternaIndisponivelException extends RuntimeException {
 
@@ -1242,6 +1242,9 @@ package com.sicredi.votacao.services.external;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.sicredi.votacao.dtos.StatusVotacao;
+import com.sicredi.votacao.exceptions.CpfInvalidoException;
+import com.sicredi.votacao.exceptions.IntegracaoExternaIndisponivelException;
 import java.io.IOException;
 import java.time.Duration;
 import okhttp3.mockwebserver.MockResponse;
@@ -1316,7 +1319,11 @@ Expected: FAIL — compile error, `WebClientUserInfoClient` does not exist.
 ```java
 package com.sicredi.votacao.services.external;
 
+import com.sicredi.votacao.dtos.StatusVotacao;
+import com.sicredi.votacao.exceptions.CpfInvalidoException;
+import com.sicredi.votacao.exceptions.IntegracaoExternaIndisponivelException;
 import java.time.Duration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -1329,6 +1336,7 @@ public class WebClientUserInfoClient implements UserInfoClient {
     private final WebClient webClient;
     private final Duration timeout;
 
+    @Autowired
     public WebClientUserInfoClient(
         WebClient.Builder webClientBuilder,
         @Value("${app.external.user-info-url}") String baseUrl,
