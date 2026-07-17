@@ -3,6 +3,7 @@ package com.sicredi.votacao.services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.sicredi.votacao.dtos.ResultadoPauta;
 import com.sicredi.votacao.exceptions.PautaNaoEncontradaException;
 import com.sicredi.votacao.exceptions.SessaoJaAbertaException;
 import com.sicredi.votacao.models.Pauta;
@@ -17,6 +18,9 @@ class PautaServiceTest {
 
     @Autowired
     private PautaService pautaService;
+
+    @Autowired
+    private com.sicredi.votacao.repositories.VotoRepository votoRepository;
 
     @Test
     void criarPautaPersisteEDevolveComId() {
@@ -62,5 +66,30 @@ class PautaServiceTest {
 
         assertThatThrownBy(() -> pautaService.abrirSessao(pauta.getId(), null))
             .isInstanceOf(SessaoJaAbertaException.class);
+    }
+
+    @Test
+    void apurarResultadoContabilizaVotosEDefineAprovada() {
+        Pauta pauta = pautaService.criarPauta("Pauta Resultado", "desc");
+        votoRepository.save(new com.sicredi.votacao.models.Voto(pauta.getId(), "11111111111", com.sicredi.votacao.models.OpcaoVoto.SIM));
+        votoRepository.save(new com.sicredi.votacao.models.Voto(pauta.getId(), "22222222222", com.sicredi.votacao.models.OpcaoVoto.SIM));
+        votoRepository.save(new com.sicredi.votacao.models.Voto(pauta.getId(), "33333333333", com.sicredi.votacao.models.OpcaoVoto.NAO));
+
+        ResultadoPauta resultado = pautaService.apurarResultado(pauta.getId());
+
+        assertThat(resultado.votosSim()).isEqualTo(2L);
+        assertThat(resultado.votosNao()).isEqualTo(1L);
+        assertThat(resultado.resultado()).isEqualTo("APROVADA");
+    }
+
+    @Test
+    void apurarResultadoSemVotosDaEmpateZeroAZero() {
+        Pauta pauta = pautaService.criarPauta("Pauta Vazia", "desc");
+
+        ResultadoPauta resultado = pautaService.apurarResultado(pauta.getId());
+
+        assertThat(resultado.votosSim()).isZero();
+        assertThat(resultado.votosNao()).isZero();
+        assertThat(resultado.resultado()).isEqualTo("EMPATE");
     }
 }
