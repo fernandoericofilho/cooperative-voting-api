@@ -35,4 +35,5 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    systemProperty("spring.profiles.active", System.getProperty("spring.profiles.active", "local"))
 }
