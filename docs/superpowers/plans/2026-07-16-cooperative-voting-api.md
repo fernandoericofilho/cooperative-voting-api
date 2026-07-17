@@ -957,7 +957,7 @@ git commit -m "feat: add Anexo 1 screen envelope DTOs"
 - [ ] **Step 1: Create `StatusVotacao`**
 
 ```java
-package com.sicredi.votacao.services;
+package com.sicredi.votacao.dtos;
 
 public enum StatusVotacao {
     ABLE_TO_VOTE,
@@ -968,7 +968,9 @@ public enum StatusVotacao {
 - [ ] **Step 2: Create the `UserInfoClient` interface**
 
 ```java
-package com.sicredi.votacao.services;
+package com.sicredi.votacao.services.external;
+
+import com.sicredi.votacao.dtos.StatusVotacao;
 
 public interface UserInfoClient {
 
@@ -979,7 +981,7 @@ public interface UserInfoClient {
 - [ ] **Step 3: Create the four voto exceptions**
 
 ```java
-package com.sicredi.votacao.services;
+package com.sicredi.votacao.exceptions;
 
 public class SessaoNaoAbertaException extends RuntimeException {
 
@@ -990,7 +992,7 @@ public class SessaoNaoAbertaException extends RuntimeException {
 ```
 
 ```java
-package com.sicredi.votacao.services;
+package com.sicredi.votacao.exceptions;
 
 public class SessaoEncerradaException extends RuntimeException {
 
@@ -1001,7 +1003,7 @@ public class SessaoEncerradaException extends RuntimeException {
 ```
 
 ```java
-package com.sicredi.votacao.services;
+package com.sicredi.votacao.exceptions;
 
 public class VotoDuplicadoException extends RuntimeException {
 
@@ -1012,7 +1014,7 @@ public class VotoDuplicadoException extends RuntimeException {
 ```
 
 ```java
-package com.sicredi.votacao.services;
+package com.sicredi.votacao.exceptions;
 
 public class AssociadoNaoHabilitadoException extends RuntimeException {
 
@@ -1032,10 +1034,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.sicredi.votacao.services.external.StatusVotacao;
-import com.sicredi.votacao.services.external.UserInfoClient;
+import com.sicredi.votacao.dtos.StatusVotacao;
+import com.sicredi.votacao.exceptions.AssociadoNaoHabilitadoException;
+import com.sicredi.votacao.exceptions.SessaoEncerradaException;
+import com.sicredi.votacao.exceptions.SessaoNaoAbertaException;
+import com.sicredi.votacao.exceptions.VotoDuplicadoException;
+import com.sicredi.votacao.models.OpcaoVoto;
 import com.sicredi.votacao.models.Pauta;
-import com.sicredi.votacao.services.PautaService;
+import com.sicredi.votacao.models.Voto;
+import com.sicredi.votacao.repositories.VotoRepository;
+import com.sicredi.votacao.services.external.UserInfoClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -1130,10 +1138,16 @@ Expected: FAIL — compile error, `VotoService` does not exist.
 ```java
 package com.sicredi.votacao.services;
 
-import com.sicredi.votacao.services.external.StatusVotacao;
-import com.sicredi.votacao.services.external.UserInfoClient;
+import com.sicredi.votacao.dtos.StatusVotacao;
+import com.sicredi.votacao.exceptions.AssociadoNaoHabilitadoException;
+import com.sicredi.votacao.exceptions.SessaoEncerradaException;
+import com.sicredi.votacao.exceptions.SessaoNaoAbertaException;
+import com.sicredi.votacao.exceptions.VotoDuplicadoException;
+import com.sicredi.votacao.models.OpcaoVoto;
 import com.sicredi.votacao.models.Pauta;
-import com.sicredi.votacao.services.PautaService;
+import com.sicredi.votacao.models.Voto;
+import com.sicredi.votacao.repositories.VotoRepository;
+import com.sicredi.votacao.services.external.UserInfoClient;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -1178,7 +1192,7 @@ Expected: PASS (all 5 tests)
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/services src/main/java/com/sicredi/votacao/exceptions src/test/java/com/sicredi/votacao/services
+git add src/main/java/com/sicredi/votacao/services src/main/java/com/sicredi/votacao/dtos src/main/java/com/sicredi/votacao/exceptions src/test/java/com/sicredi/votacao/services
 git commit -m "feat: add VotoService business rules"
 ```
 
@@ -1670,7 +1684,7 @@ git commit -m "feat: add global exception handler mapping domain errors to HTTP 
 - [ ] **Step 1: Create the request DTOs**
 
 ```java
-package com.sicredi.votacao.controllers;
+package com.sicredi.votacao.controllers.request;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -1679,14 +1693,14 @@ public record CriarPautaRequest(@NotBlank String titulo, String descricao) {
 ```
 
 ```java
-package com.sicredi.votacao.controllers;
+package com.sicredi.votacao.controllers.request;
 
 public record AbrirSessaoRequest(Long duracaoSegundos) {
 }
 ```
 
 ```java
-package com.sicredi.votacao.controllers;
+package com.sicredi.votacao.controllers.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -1709,6 +1723,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sicredi.votacao.controllers.request.AbrirSessaoRequest;
+import com.sicredi.votacao.controllers.request.CriarPautaRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -1794,7 +1810,9 @@ package com.sicredi.votacao.mappers;
 
 import com.sicredi.votacao.dtos.Botao;
 import com.sicredi.votacao.dtos.ItemFormulario;
+import com.sicredi.votacao.dtos.ResultadoPauta;
 import com.sicredi.votacao.dtos.TelaFormulario;
+import com.sicredi.votacao.models.Pauta;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
@@ -1845,6 +1863,8 @@ public class PautaTelaMapper {
 ```java
 package com.sicredi.votacao.controllers;
 
+import com.sicredi.votacao.controllers.request.AbrirSessaoRequest;
+import com.sicredi.votacao.controllers.request.CriarPautaRequest;
 import com.sicredi.votacao.dtos.TelaFormulario;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -1897,6 +1917,7 @@ public class PautaController {
 ```java
 package com.sicredi.votacao.controllers;
 
+import com.sicredi.votacao.controllers.request.RegistrarVotoRequest;
 import com.sicredi.votacao.dtos.Botao;
 import com.sicredi.votacao.dtos.ItemFormulario;
 import com.sicredi.votacao.dtos.TelaFormulario;
@@ -1946,6 +1967,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sicredi.votacao.controllers.request.RegistrarVotoRequest;
 import com.sicredi.votacao.services.PautaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1997,7 +2019,7 @@ Expected: PASS
 - [ ] **Step 10: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/controllers src/main/java/com/sicredi/votacao/mappers src/test/java/com/sicredi/votacao/controllers
+git add src/main/java/com/sicredi/votacao/controllers src/main/java/com/sicredi/votacao/controllers/request src/main/java/com/sicredi/votacao/mappers src/test/java/com/sicredi/votacao/controllers
 git commit -m "feat: add real action controllers returning Anexo 1 screen envelopes"
 ```
 
@@ -2079,6 +2101,11 @@ Expected: FAIL — compile error, `TelaController` does not exist.
 ```java
 package com.sicredi.votacao.controllers;
 
+import com.sicredi.votacao.dtos.Botao;
+import com.sicredi.votacao.dtos.ItemFormulario;
+import com.sicredi.votacao.dtos.ItemSelecao;
+import com.sicredi.votacao.dtos.TelaFormulario;
+import com.sicredi.votacao.dtos.TelaSelecao;
 import com.sicredi.votacao.models.Pauta;
 import com.sicredi.votacao.services.PautaService;
 import java.util.List;
@@ -2155,6 +2182,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sicredi.votacao.controllers.request.CpfFormularioRequest;
 import com.sicredi.votacao.services.PautaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2211,7 +2239,7 @@ Expected: FAIL — compile error, `VotoTelaController`/`CpfFormularioRequest` do
 - [ ] **Step 9: Create `CpfFormularioRequest`**
 
 ```java
-package com.sicredi.votacao.controllers;
+package com.sicredi.votacao.controllers.request;
 
 public record CpfFormularioRequest(String cpfAssociado) {
 }
@@ -2222,6 +2250,7 @@ public record CpfFormularioRequest(String cpfAssociado) {
 ```java
 package com.sicredi.votacao.controllers;
 
+import com.sicredi.votacao.controllers.request.CpfFormularioRequest;
 import com.sicredi.votacao.dtos.Botao;
 import com.sicredi.votacao.dtos.ItemFormulario;
 import com.sicredi.votacao.dtos.ItemSelecao;
@@ -2271,7 +2300,7 @@ Expected: PASS (all tests across all packages)
 - [ ] **Step 13: Commit**
 
 ```bash
-git add src/main/java/com/sicredi/votacao/controllers src/main/java/com/sicredi/votacao/services src/test/java/com/sicredi/votacao/controllers
+git add src/main/java/com/sicredi/votacao/controllers src/main/java/com/sicredi/votacao/controllers/request src/main/java/com/sicredi/votacao/services src/test/java/com/sicredi/votacao/controllers
 git commit -m "feat: add screen navigation controllers completing the Anexo 1 flow"
 ```
 
