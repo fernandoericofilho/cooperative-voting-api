@@ -32,6 +32,10 @@ public class PautaService {
             .orElseThrow(() -> new PautaNaoEncontradaException(id));
     }
 
+    public java.util.List<Pauta> listarTodas() {
+        return pautaRepository.findAll();
+    }
+
     public Pauta abrirSessao(Long pautaId, Long duracaoSegundos) {
         Pauta pauta = buscarPorId(pautaId);
         if (pauta.sessaoFoiAberta()) {
