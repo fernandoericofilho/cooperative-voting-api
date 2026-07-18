@@ -5,7 +5,7 @@ API REST em Java/Spring Boot para gerenciar pautas e sessões de votação coope
 ## 🚀 Como Rodar
 
 ### Pré-requisitos
-- Java 21+
+- Java 17+
 - Docker & Docker Compose (opcional, para rodar com PostgreSQL)
 - Postman ou curl (para testar endpoints)
 
@@ -432,7 +432,7 @@ rm -f data/votacao.db         # Remove arquivo H2
 
 ## 📞 Stack Técnica
 
-- **Linguagem:** Java 21
+- **Linguagem:** Java 17
 - **Framework:** Spring Boot 3.x
 - **Build:** Gradle (Kotlin DSL)
 - **Banco de Dados:** PostgreSQL (prod) / H2 (dev/test)

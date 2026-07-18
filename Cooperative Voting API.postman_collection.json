@@ -1,0 +1,246 @@
+{
+  "info": {
+    "name": "Cooperative Voting API",
+    "description": "API REST para gerenciar pautas e sessões de votação cooperativa",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Criar Pauta",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Aprovação de Novo Projeto\",\n  \"descricao\": \"Votação sobre implementação de novo sistema de gerenciamento\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas"]
+        },
+        "description": "Cria uma nova pauta. Retorna status: NAO_INICIADA"
+      }
+    },
+    {
+      "name": "2. Obter Pauta (antes de abrir)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas", "1"]
+        },
+        "description": "Obtém pauta com status atual. Deve retornar: NAO_INICIADA"
+      }
+    },
+    {
+      "name": "3. Abrir Sessão (60 segundos)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"duracaoSegundos\": 60\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas/1/sessoes",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas", "1", "sessoes"]
+        },
+        "description": "Abre a sessão de votação. Retorna status: ABERTA com timestamps"
+      }
+    },
+    {
+      "name": "4. Registrar Voto SIM (CPF 1)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpfAssociado\": \"12345678901\",\n  \"voto\": \"SIM\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas/1/votos",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas", "1", "votos"]
+        },
+        "description": "Registra um voto SIM. Retorna 201 Created com VotoResponse"
+      }
+    },
+    {
+      "name": "5. Registrar Voto NAO (CPF 2)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpfAssociado\": \"98765432100\",\n  \"voto\": \"NAO\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas/1/votos",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas", "1", "votos"]
+        },
+        "description": "Registra um voto NAO com outro CPF"
+      }
+    },
+    {
+      "name": "6. Registrar Voto SIM (CPF 3)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpfAssociado\": \"11122233344\",\n  \"voto\": \"SIM\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas/1/votos",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas", "1", "votos"]
+        },
+        "description": "Registra mais um voto SIM (agora 2 SIM, 1 NAO)"
+      }
+    },
+    {
+      "name": "7. Obter Resultado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas/1/resultado",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas", "1", "resultado"]
+        },
+        "description": "Obtém resultado da votação. Deve retornar totalSim: 2, totalNao: 1, resultado: APROVADA"
+      }
+    },
+    {
+      "name": "ERROR: Voto Duplicado (409)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpfAssociado\": \"12345678901\",\n  \"voto\": \"NAO\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas/1/votos",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas", "1", "votos"]
+        },
+        "description": "Tenta votar novamente com mesmo CPF. Deve retornar 409 Conflict - VotoDuplicadoException"
+      }
+    },
+    {
+      "name": "ERROR: Sessão Já Aberta (409)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"duracaoSegundos\": 120\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas/1/sessoes",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas", "1", "sessoes"]
+        },
+        "description": "Tenta abrir sessão novamente. Deve retornar 409 Conflict - SessaoJaAbertaException"
+      }
+    },
+    {
+      "name": "ERROR: Pauta Não Encontrada (404)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas/999",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas", "999"]
+        },
+        "description": "Tenta obter pauta inexistente. Deve retornar 404 Not Found"
+      }
+    },
+    {
+      "name": "ERROR: Sessão Não Aberta (422)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpfAssociado\": \"55566677788\",\n  \"voto\": \"SIM\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/pautas/2/votos",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "pautas", "2", "votos"]
+        },
+        "description": "Tenta votar em pauta que não tem sessão aberta. Deve retornar 422 Unprocessable Entity - SessaoNaoAbertaException (após criar pauta 2 sem abrir sessão)"
+      }
+    }
+  ]
+}
