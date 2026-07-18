@@ -1,26 +1,28 @@
 package com.sicredi.votacao.controllers;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sicredi.votacao.controllers.request.RegistrarVotoRequest;
 import com.sicredi.votacao.dtos.StatusVotacao;
-import com.sicredi.votacao.services.PautaService;
+import com.sicredi.votacao.models.Pauta;
+import com.sicredi.votacao.repositories.PautaRepository;
 import com.sicredi.votacao.services.external.UserInfoClient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("local")
+@TestPropertySource(properties = {"spring.profiles.active=test"})
 class VotoControllerTest {
 
     @Autowired
@@ -30,20 +32,35 @@ class VotoControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private PautaService pautaService;
+    private PautaRepository pautaRepository;
 
     @MockBean
     private UserInfoClient userInfoClient;
 
-    @Test
-    void registrarVotoValidoRetornaConfirmacao() throws Exception {
-        var pauta = pautaService.criarPauta("Pauta Voto", "desc");
-        pautaService.abrirSessao(pauta.getId(), 60L);
-        when(userInfoClient.consultar("11122233344")).thenReturn(StatusVotacao.ABLE_TO_VOTE);
+    private Pauta pautaAberta;
 
-        mockMvc.perform(post("/api/v1/pautas/" + pauta.getId() + "/votos")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new RegistrarVotoRequest("11122233344", "SIM"))))
-            .andExpect(status().isOk());
+    @BeforeEach
+    void setup() {
+        Pauta pauta = new Pauta("Pauta Teste", "Desc");
+        pautaAberta = pautaRepository.save(pauta);
+        pautaAberta.abrirSessao(60);
+        pautaAberta = pautaRepository.save(pautaAberta);
+    }
+
+    @Test
+    void registrarVotoReturnsVotoDTOWithCreatedStatus() throws Exception {
+        when(userInfoClient.consultar("12345678901")).thenReturn(StatusVotacao.ABLE_TO_VOTE);
+
+        RegistrarVotoRequest request = new RegistrarVotoRequest("12345678901", "SIM");
+
+        mockMvc.perform(post("/api/v1/pautas/" + pautaAberta.getId() + "/votos")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.pautaId", is(pautaAberta.getId().intValue())))
+                .andExpect(jsonPath("$.cpfAssociado", is("12345678901")))
+                .andExpect(jsonPath("$.voto", is("SIM")))
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.criadoEm").isNotEmpty());
     }
 }
