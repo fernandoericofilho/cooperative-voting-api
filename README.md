@@ -408,6 +408,37 @@ Cada commit é independently testável e revertível.
 
 ## 🛠️ Troubleshooting
 
+### ❌ "gradlew: not found" no Docker (Windows/CRLF)
+
+**Problema:** Git converteu `gradlew` para CRLF (Windows) e Docker não consegue executar.
+
+**Solução Automática (Recomendada):**
+Este repositório usa `.gitattributes` para forçar LF automaticamente. Ao clonar:
+```bash
+git clone <repo>
+cd cooperative-voting-api
+# .gitattributes já garante line endings corretos
+docker-compose up --build
+```
+
+**Solução Manual (se problema persistir):**
+```bash
+# Converter de volta para LF
+dos2unix gradlew          # ou: sed -i 's/\r$//' gradlew
+chmod +x gradlew          # Garantir permissão executável
+
+# Depois rodar Docker
+docker-compose up --build
+```
+
+**Alternativa rápida (sem Docker):**
+Se Docker continuar falhando, use a opção local:
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+---
+
 **Erro ao rodar docker-compose: "Port 8080 already in use"**
 ```bash
 lsof -i :8080          # Identifica qual processo está usando a porta
@@ -427,6 +458,15 @@ Certifique-se que não há dados sujos de execuções anteriores:
 rm -f data/votacao.db         # Remove arquivo H2
 ./gradlew clean test          # Limpa e reexecuta
 ```
+
+**Swagger não carrega em http://localhost:8080/swagger-ui.html**
+Verifique se a aplicação está rodando:
+```bash
+curl http://localhost:8080/api/v1/pautas  # Se retornar [], app está ok
+```
+Se não retornar nada:
+- Verifique logs: `./gradlew bootRun --args='--spring.profiles.active=local'`
+- Espere 15-20s após iniciar (Spring Boot + migrations Flyway levam tempo)
 
 ---
 
