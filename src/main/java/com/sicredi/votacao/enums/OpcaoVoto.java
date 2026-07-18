@@ -1,4 +1,4 @@
-package com.sicredi.votacao.models;
+package com.sicredi.votacao.enums;
 
 public enum OpcaoVoto {
     SIM,

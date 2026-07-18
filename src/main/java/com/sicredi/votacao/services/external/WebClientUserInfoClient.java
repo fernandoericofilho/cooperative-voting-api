@@ -1,6 +1,6 @@
 package com.sicredi.votacao.services.external;
 
-import com.sicredi.votacao.dtos.StatusVotacao;
+import com.sicredi.votacao.enums.StatusVotacao;
 import com.sicredi.votacao.exceptions.CpfInvalidoException;
 import com.sicredi.votacao.exceptions.IntegracaoExternaIndisponivelException;
 import java.time.Duration;

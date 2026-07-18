@@ -2,7 +2,7 @@ package com.sicredi.votacao.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sicredi.votacao.controllers.request.RegistrarVotoRequest;
-import com.sicredi.votacao.dtos.StatusVotacao;
+import com.sicredi.votacao.enums.StatusVotacao;
 import com.sicredi.votacao.models.Pauta;
 import com.sicredi.votacao.repositories.PautaRepository;
 import com.sicredi.votacao.services.external.UserInfoClient;

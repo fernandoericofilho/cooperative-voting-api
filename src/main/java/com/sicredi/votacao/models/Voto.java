@@ -1,5 +1,6 @@
 package com.sicredi.votacao.models;
 
+import com.sicredi.votacao.enums.OpcaoVoto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

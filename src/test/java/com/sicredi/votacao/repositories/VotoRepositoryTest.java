@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.sicredi.votacao.dtos.ContagemVoto;
-import com.sicredi.votacao.models.OpcaoVoto;
+import com.sicredi.votacao.enums.OpcaoVoto;
 import com.sicredi.votacao.models.Pauta;
 import com.sicredi.votacao.models.Voto;
 import org.junit.jupiter.api.Test;

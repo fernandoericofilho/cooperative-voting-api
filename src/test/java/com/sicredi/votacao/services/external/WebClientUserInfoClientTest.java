@@ -3,7 +3,7 @@ package com.sicredi.votacao.services.external;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.sicredi.votacao.dtos.StatusVotacao;
+import com.sicredi.votacao.enums.StatusVotacao;
 import com.sicredi.votacao.exceptions.CpfInvalidoException;
 import com.sicredi.votacao.exceptions.IntegracaoExternaIndisponivelException;
 import java.io.IOException;

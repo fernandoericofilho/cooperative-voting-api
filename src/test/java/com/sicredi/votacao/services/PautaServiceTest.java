@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.sicredi.votacao.dtos.ResultadoPauta;
+import com.sicredi.votacao.enums.OpcaoVoto;
 import com.sicredi.votacao.exceptions.PautaNaoEncontradaException;
 import com.sicredi.votacao.exceptions.SessaoJaAbertaException;
 import com.sicredi.votacao.models.Pauta;
+import com.sicredi.votacao.models.Voto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,9 +73,9 @@ class PautaServiceTest {
     @Test
     void apurarResultadoContabilizaVotosEDefineAprovada() {
         Pauta pauta = pautaService.criarPauta("Pauta Resultado", "desc");
-        votoRepository.save(new com.sicredi.votacao.models.Voto(pauta.getId(), "11111111111", com.sicredi.votacao.models.OpcaoVoto.SIM));
-        votoRepository.save(new com.sicredi.votacao.models.Voto(pauta.getId(), "22222222222", com.sicredi.votacao.models.OpcaoVoto.SIM));
-        votoRepository.save(new com.sicredi.votacao.models.Voto(pauta.getId(), "33333333333", com.sicredi.votacao.models.OpcaoVoto.NAO));
+        votoRepository.save(new Voto(pauta.getId(), "11111111111", OpcaoVoto.SIM));
+        votoRepository.save(new Voto(pauta.getId(), "22222222222", OpcaoVoto.SIM));
+        votoRepository.save(new Voto(pauta.getId(), "33333333333", OpcaoVoto.NAO));
 
         ResultadoPauta resultado = pautaService.apurarResultado(pauta.getId());
 

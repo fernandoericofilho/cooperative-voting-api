@@ -1,11 +1,11 @@
 package com.sicredi.votacao.services;
 
-import com.sicredi.votacao.dtos.StatusVotacao;
+import com.sicredi.votacao.enums.OpcaoVoto;
+import com.sicredi.votacao.enums.StatusVotacao;
 import com.sicredi.votacao.exceptions.AssociadoNaoHabilitadoException;
 import com.sicredi.votacao.exceptions.SessaoEncerradaException;
 import com.sicredi.votacao.exceptions.SessaoNaoAbertaException;
 import com.sicredi.votacao.exceptions.VotoDuplicadoException;
-import com.sicredi.votacao.models.OpcaoVoto;
 import com.sicredi.votacao.models.Pauta;
 import com.sicredi.votacao.models.Voto;
 import com.sicredi.votacao.repositories.VotoRepository;

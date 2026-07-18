@@ -1,4 +1,4 @@
-package com.sicredi.votacao.dtos;
+package com.sicredi.votacao.enums;
 
 public enum StatusVotacao {
     ABLE_TO_VOTE,
