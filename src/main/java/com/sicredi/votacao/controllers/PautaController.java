@@ -9,6 +9,10 @@ import com.sicredi.votacao.mappers.ResultadoVotacaoMapper;
 import com.sicredi.votacao.models.Pauta;
 import com.sicredi.votacao.services.PautaService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +35,19 @@ public class PautaController {
     public ResponseEntity<PautaResponse> criarPauta(@Valid @RequestBody CriarPautaRequest request) {
         Pauta pauta = pautaService.criarPauta(request.titulo(), request.descricao());
         return ResponseEntity.status(HttpStatus.CREATED).body(pautaMapper.toPautaDTO(pauta));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<PautaResponse>> listarPautas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Page<Pauta> pautas = pautaService.listarPautas(pageable);
+        Page<PautaResponse> response = pautas.map(pautaMapper::toPautaDTO);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

@@ -13,6 +13,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import org.junit.jupiter.api.BeforeEach;
+
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,6 +32,11 @@ class PautaControllerTest {
 
     @Autowired
     private PautaRepository pautaRepository;
+
+    @BeforeEach
+    void setUp() {
+        pautaRepository.deleteAll();
+    }
 
     @Test
     void criarPautaReturnsCreatedWithPautaDTO() throws Exception {
@@ -87,5 +94,77 @@ class PautaControllerTest {
                 .andExpect(jsonPath("$.resultado", is("EMPATE")))
                 .andExpect(jsonPath("$.totalSim", is(0)))
                 .andExpect(jsonPath("$.totalNao", is(0)));
+    }
+
+    @Test
+    void listarPautasRetornaComPaginacaoPadrao() throws Exception {
+        // Create 15 pautas
+        for (int i = 0; i < 15; i++) {
+            pautaRepository.save(new Pauta("Pauta " + i, "Descrição " + i));
+        }
+
+        mockMvc.perform(get("/api/v1/pautas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()", is(10)))
+                .andExpect(jsonPath("$.totalElements", is(15)))
+                .andExpect(jsonPath("$.totalPages", is(2)))
+                .andExpect(jsonPath("$.number", is(0)))
+                .andExpect(jsonPath("$.size", is(10)));
+    }
+
+    @Test
+    void listarPautasRetornaPrimeiraPageComTamanhoPersonalizado() throws Exception {
+        // Create 15 pautas
+        for (int i = 0; i < 15; i++) {
+            pautaRepository.save(new Pauta("Pauta " + i, "Descrição " + i));
+        }
+
+        mockMvc.perform(get("/api/v1/pautas?page=0&size=5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()", is(5)))
+                .andExpect(jsonPath("$.totalElements", is(15)))
+                .andExpect(jsonPath("$.totalPages", is(3)))
+                .andExpect(jsonPath("$.number", is(0)))
+                .andExpect(jsonPath("$.size", is(5)));
+    }
+
+    @Test
+    void listarPautasRetornaSegundaPage() throws Exception {
+        // Create 15 pautas
+        for (int i = 0; i < 15; i++) {
+            pautaRepository.save(new Pauta("Pauta " + i, "Descrição " + i));
+        }
+
+        mockMvc.perform(get("/api/v1/pautas?page=1&size=10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()", is(5)))
+                .andExpect(jsonPath("$.totalElements", is(15)))
+                .andExpect(jsonPath("$.totalPages", is(2)))
+                .andExpect(jsonPath("$.number", is(1)))
+                .andExpect(jsonPath("$.size", is(10)));
+    }
+
+    @Test
+    void listarPautasRetornaEmOrdenacaoPersonalizada() throws Exception {
+        Pauta pauta1 = pautaRepository.save(new Pauta("Pauta 1", "Descrição 1"));
+        Pauta pauta2 = pautaRepository.save(new Pauta("Pauta 2", "Descrição 2"));
+        Pauta pauta3 = pautaRepository.save(new Pauta("Pauta 3", "Descrição 3"));
+
+        mockMvc.perform(get("/api/v1/pautas?page=0&size=10&sortBy=titulo&sortDirection=ASC"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()", is(3)))
+                .andExpect(jsonPath("$.content[0].titulo", is("Pauta 1")))
+                .andExpect(jsonPath("$.content[1].titulo", is("Pauta 2")))
+                .andExpect(jsonPath("$.content[2].titulo", is("Pauta 3")));
+    }
+
+    @Test
+    void listarPautasRetornaVazioQuandoNaoExistemPautas() throws Exception {
+        mockMvc.perform(get("/api/v1/pautas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()", is(0)))
+                .andExpect(jsonPath("$.totalElements", is(0)))
+                .andExpect(jsonPath("$.totalPages", is(0)))
+                .andExpect(jsonPath("$.number", is(0)));
     }
 }

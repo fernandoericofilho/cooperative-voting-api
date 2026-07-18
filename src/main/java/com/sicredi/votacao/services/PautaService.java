@@ -9,6 +9,8 @@ import com.sicredi.votacao.models.Pauta;
 import com.sicredi.votacao.repositories.PautaRepository;
 import com.sicredi.votacao.repositories.VotoRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -38,6 +40,11 @@ public class PautaService {
 
     public java.util.List<Pauta> listarTodas() {
         return pautaRepository.findAll();
+    }
+
+    public Page<Pauta> listarPautas(Pageable pageable) {
+        log.info("Listando pautas: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
+        return pautaRepository.findAll(pageable);
     }
 
     public Pauta abrirSessao(Long pautaId, Long duracaoSegundos) {
