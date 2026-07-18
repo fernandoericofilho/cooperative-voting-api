@@ -95,4 +95,15 @@ class WebClientUserInfoClientTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("nulo");
     }
+
+    @Test
+    void consultarFallbackMethodThrowsIntegracaoExternaIndisponivelException() {
+        // Verify that the fallback method exists and throws the correct exception
+        String cpf = "12345678900";
+        Exception testException = new RuntimeException("Service unavailable");
+
+        assertThatThrownBy(() -> client.consultarFallback(cpf, testException))
+            .isInstanceOf(IntegracaoExternaIndisponivelException.class)
+            .hasMessageContaining("Serviço de elegibilidade indisponível");
+    }
 }

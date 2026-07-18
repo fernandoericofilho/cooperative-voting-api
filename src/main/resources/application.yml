@@ -19,6 +19,24 @@ app:
     user-info-url: https://user-info.herokuapp.com
     timeout-seconds: 3
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failureRateThreshold: 50
+        slowCallRateThreshold: 50
+        waitDurationInOpenState: 30000  # 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        minimumNumberOfCalls: 5
+    instances:
+      userInfoClient:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 2
+        waitDuration: 200
+
 management:
   endpoints:
     web:
