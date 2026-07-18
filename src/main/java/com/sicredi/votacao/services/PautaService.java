@@ -1,7 +1,7 @@
 package com.sicredi.votacao.services;
 
 import com.sicredi.votacao.dtos.ContagemVoto;
-import com.sicredi.votacao.dtos.ResultadoPauta;
+import com.sicredi.votacao.dtos.ResultadoPautaDto;
 import com.sicredi.votacao.enums.OpcaoVoto;
 import com.sicredi.votacao.exceptions.PautaNaoEncontradaException;
 import com.sicredi.votacao.exceptions.SessaoJaAbertaException;
@@ -46,7 +46,7 @@ public class PautaService {
         return pautaRepository.save(pauta);
     }
 
-    public ResultadoPauta apurarResultado(Long pautaId) {
+    public ResultadoPautaDto apurarResultado(Long pautaId) {
         buscarPorId(pautaId);
         long votosSim = 0L;
         long votosNao = 0L;
@@ -57,6 +57,6 @@ public class PautaService {
                 votosNao = contagem.getTotal();
             }
         }
-        return ResultadoPauta.calcular(votosSim, votosNao);
+        return ResultadoPautaDto.calcular(votosSim, votosNao);
     }
 }

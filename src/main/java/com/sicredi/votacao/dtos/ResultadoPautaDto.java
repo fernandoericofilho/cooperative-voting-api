@@ -1,8 +1,8 @@
 package com.sicredi.votacao.dtos;
 
-public record ResultadoPauta(long votosSim, long votosNao, String resultado) {
+public record ResultadoPautaDto(long votosSim, long votosNao, String resultado) {
 
-    public static ResultadoPauta calcular(long votosSim, long votosNao) {
+    public static ResultadoPautaDto calcular(long votosSim, long votosNao) {
         String resultado;
         if (votosSim > votosNao) {
             resultado = "APROVADA";
@@ -11,6 +11,6 @@ public record ResultadoPauta(long votosSim, long votosNao, String resultado) {
         } else {
             resultado = "EMPATE";
         }
-        return new ResultadoPauta(votosSim, votosNao, resultado);
+        return new ResultadoPautaDto(votosSim, votosNao, resultado);
     }
 }

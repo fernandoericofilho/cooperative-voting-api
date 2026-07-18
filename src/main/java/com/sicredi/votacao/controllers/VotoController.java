@@ -3,7 +3,7 @@ package com.sicredi.votacao.controllers;
 import com.sicredi.votacao.controllers.request.RegistrarVotoRequest;
 import com.sicredi.votacao.controllers.response.VotoResponse;
 import com.sicredi.votacao.enums.OpcaoVoto;
-import com.sicredi.votacao.mappers.VotoDtoMapper;
+import com.sicredi.votacao.mappers.VotoMapper;
 import com.sicredi.votacao.models.Voto;
 import com.sicredi.votacao.services.VotoService;
 import jakarta.validation.Valid;
@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.*;
 public class VotoController {
 
     private final VotoService votoService;
-    private final VotoDtoMapper votoDtoMapper;
+    private final VotoMapper votoMapper;
 
-    public VotoController(VotoService votoService, VotoDtoMapper votoDtoMapper) {
+    public VotoController(VotoService votoService, VotoMapper votoMapper) {
         this.votoService = votoService;
-        this.votoDtoMapper = votoDtoMapper;
+        this.votoMapper = votoMapper;
     }
 
     @PostMapping
@@ -28,6 +28,6 @@ public class VotoController {
             @PathVariable Long pautaId,
             @Valid @RequestBody RegistrarVotoRequest request) {
         Voto voto = votoService.registrarVoto(pautaId, request.cpfAssociado(), OpcaoVoto.valueOf(request.voto()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(votoDtoMapper.toVotoDTO(voto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(votoMapper.toVotoDTO(voto));
     }
 }

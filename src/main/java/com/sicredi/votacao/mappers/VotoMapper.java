@@ -5,7 +5,7 @@ import com.sicredi.votacao.models.Voto;
 import org.springframework.stereotype.Component;
 
 @Component
-public class VotoDtoMapper {
+public class VotoMapper {
 
     public VotoResponse toVotoDTO(Voto voto) {
         return new VotoResponse(

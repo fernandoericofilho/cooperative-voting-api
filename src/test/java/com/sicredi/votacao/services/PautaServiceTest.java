@@ -3,7 +3,7 @@ package com.sicredi.votacao.services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.sicredi.votacao.dtos.ResultadoPauta;
+import com.sicredi.votacao.dtos.ResultadoPautaDto;
 import com.sicredi.votacao.enums.OpcaoVoto;
 import com.sicredi.votacao.exceptions.PautaNaoEncontradaException;
 import com.sicredi.votacao.exceptions.SessaoJaAbertaException;
@@ -77,7 +77,7 @@ class PautaServiceTest {
         votoRepository.save(new Voto(pauta.getId(), "22222222222", OpcaoVoto.SIM));
         votoRepository.save(new Voto(pauta.getId(), "33333333333", OpcaoVoto.NAO));
 
-        ResultadoPauta resultado = pautaService.apurarResultado(pauta.getId());
+        ResultadoPautaDto resultado = pautaService.apurarResultado(pauta.getId());
 
         assertThat(resultado.votosSim()).isEqualTo(2L);
         assertThat(resultado.votosNao()).isEqualTo(1L);
@@ -88,7 +88,7 @@ class PautaServiceTest {
     void apurarResultadoSemVotosDaEmpateZeroAZero() {
         Pauta pauta = pautaService.criarPauta("Pauta Vazia", "desc");
 
-        ResultadoPauta resultado = pautaService.apurarResultado(pauta.getId());
+        ResultadoPautaDto resultado = pautaService.apurarResultado(pauta.getId());
 
         assertThat(resultado.votosSim()).isZero();
         assertThat(resultado.votosNao()).isZero();

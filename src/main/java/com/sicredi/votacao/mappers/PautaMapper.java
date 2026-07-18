@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 @Component
-public class PautaDtoMapper {
+public class PautaMapper {
 
     public PautaResponse toPautaDTO(Pauta pauta) {
         String status = calculatePautaStatus(pauta);
