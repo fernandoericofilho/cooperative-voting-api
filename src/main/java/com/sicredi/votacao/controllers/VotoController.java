@@ -1,7 +1,7 @@
 package com.sicredi.votacao.controllers;
 
 import com.sicredi.votacao.controllers.request.RegistrarVotoRequest;
-import com.sicredi.votacao.dtos.VotoDTO;
+import com.sicredi.votacao.controllers.response.VotoResponse;
 import com.sicredi.votacao.mappers.DomainDTOMapper;
 import com.sicredi.votacao.models.OpcaoVoto;
 import com.sicredi.votacao.models.Voto;
@@ -24,7 +24,7 @@ public class VotoController {
     }
 
     @PostMapping
-    public ResponseEntity<VotoDTO> registrarVoto(
+    public ResponseEntity<VotoResponse> registrarVoto(
             @PathVariable Long pautaId,
             @Valid @RequestBody RegistrarVotoRequest request) {
         Voto voto = votoService.registrarVoto(pautaId, request.cpfAssociado(), OpcaoVoto.valueOf(request.voto()));

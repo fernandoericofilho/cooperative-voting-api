@@ -1,16 +1,16 @@
-package com.sicredi.votacao.dtos;
+package com.sicredi.votacao.controllers.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResultadoDTO {
+public class ResultadoVotacaoResponse {
     private Long pautaId;
     private Integer totalSim;
     private Integer totalNao;
     private String resultado;
     private String status;
 
-    public ResultadoDTO(Long pautaId, Integer totalSim, Integer totalNao, String resultado, String status) {
+    public ResultadoVotacaoResponse(Long pautaId, Integer totalSim, Integer totalNao, String resultado, String status) {
         this.pautaId = pautaId;
         this.totalSim = totalSim;
         this.totalNao = totalNao;

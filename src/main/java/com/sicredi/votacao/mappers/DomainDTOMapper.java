@@ -1,9 +1,9 @@
 package com.sicredi.votacao.mappers;
 
-import com.sicredi.votacao.dtos.PautaDTO;
-import com.sicredi.votacao.dtos.ResultadoDTO;
+import com.sicredi.votacao.controllers.response.PautaResponse;
+import com.sicredi.votacao.controllers.response.ResultadoVotacaoResponse;
+import com.sicredi.votacao.controllers.response.VotoResponse;
 import com.sicredi.votacao.dtos.ResultadoPauta;
-import com.sicredi.votacao.dtos.VotoDTO;
 import com.sicredi.votacao.models.Pauta;
 import com.sicredi.votacao.models.Voto;
 import org.springframework.stereotype.Component;
@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 @Component
 public class DomainDTOMapper {
 
-    public PautaDTO toPautaDTO(Pauta pauta) {
+    public PautaResponse toPautaDTO(Pauta pauta) {
         String status = calculatePautaStatus(pauta);
-        return new PautaDTO(
+        return new PautaResponse(
             pauta.getId(),
             pauta.getTitulo(),
             pauta.getDescricao(),
@@ -26,8 +26,8 @@ public class DomainDTOMapper {
         );
     }
 
-    public VotoDTO toVotoDTO(Voto voto) {
-        return new VotoDTO(
+    public VotoResponse toVotoDTO(Voto voto) {
+        return new VotoResponse(
             voto.getId(),
             voto.getPautaId(),
             voto.getCpfAssociado(),
@@ -36,8 +36,8 @@ public class DomainDTOMapper {
         );
     }
 
-    public ResultadoDTO toResultadoDTO(Pauta pauta, ResultadoPauta resultadoPauta) {
-        return new ResultadoDTO(
+    public ResultadoVotacaoResponse toResultadoDTO(Pauta pauta, ResultadoPauta resultadoPauta) {
+        return new ResultadoVotacaoResponse(
             pauta.getId(),
             (int) resultadoPauta.votosSim(),
             (int) resultadoPauta.votosNao(),

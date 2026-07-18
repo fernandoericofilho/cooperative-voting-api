@@ -1,6 +1,9 @@
 package com.sicredi.votacao.dtos;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sicredi.votacao.controllers.response.PautaResponse;
+import com.sicredi.votacao.controllers.response.ResultadoVotacaoResponse;
+import com.sicredi.votacao.controllers.response.VotoResponse;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -14,7 +17,7 @@ class DomainDTOSerializationTest {
     @Test
     void pautaDTOSerializesCorrectly() throws Exception {
         LocalDateTime now = LocalDateTime.now();
-        PautaDTO pauta = new PautaDTO(1L, "Título", "Descrição", now, null, null, "NAO_INICIADA");
+        PautaResponse pauta = new PautaResponse(1L, "Título", "Descrição", now, null, null, "NAO_INICIADA");
 
         String json = mapper.writeValueAsString(pauta);
         assertTrue(json.contains("\"id\":1"));
@@ -25,7 +28,7 @@ class DomainDTOSerializationTest {
     @Test
     void votoDTOSerializesCorrectly() throws Exception {
         LocalDateTime now = LocalDateTime.now();
-        VotoDTO voto = new VotoDTO(1L, 1L, "12345678901", "SIM", now);
+        VotoResponse voto = new VotoResponse(1L, 1L, "12345678901", "SIM", now);
 
         String json = mapper.writeValueAsString(voto);
         assertTrue(json.contains("\"voto\":\"SIM\""));
@@ -34,7 +37,7 @@ class DomainDTOSerializationTest {
 
     @Test
     void resultadoDTOSerializesCorrectly() throws Exception {
-        ResultadoDTO resultado = new ResultadoDTO(1L, 10, 5, "SIM", "ENCERRADA");
+        ResultadoVotacaoResponse resultado = new ResultadoVotacaoResponse(1L, 10, 5, "SIM", "ENCERRADA");
 
         String json = mapper.writeValueAsString(resultado);
         assertTrue(json.contains("\"totalSim\":10"));

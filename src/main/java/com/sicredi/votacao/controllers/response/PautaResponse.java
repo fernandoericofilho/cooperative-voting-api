@@ -1,10 +1,10 @@
-package com.sicredi.votacao.dtos;
+package com.sicredi.votacao.controllers.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PautaDTO {
+public class PautaResponse {
     private Long id;
     private String titulo;
     private String descricao;
@@ -13,7 +13,7 @@ public class PautaDTO {
     private LocalDateTime sessaoFechaEm;
     private String status;
 
-    public PautaDTO(Long id, String titulo, String descricao, LocalDateTime criadoEm,
+    public PautaResponse(Long id, String titulo, String descricao, LocalDateTime criadoEm,
                     LocalDateTime sessaoAbertaEm, LocalDateTime sessaoFechaEm, String status) {
         this.id = id;
         this.titulo = titulo;
