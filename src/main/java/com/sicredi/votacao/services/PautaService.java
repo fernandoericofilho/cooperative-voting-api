@@ -8,8 +8,10 @@ import com.sicredi.votacao.exceptions.SessaoJaAbertaException;
 import com.sicredi.votacao.models.Pauta;
 import com.sicredi.votacao.repositories.PautaRepository;
 import com.sicredi.votacao.repositories.VotoRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class PautaService {
 
@@ -24,7 +26,9 @@ public class PautaService {
     }
 
     public Pauta criarPauta(String titulo, String descricao) {
-        return pautaRepository.save(new Pauta(titulo, descricao));
+        Pauta pauta = pautaRepository.save(new Pauta(titulo, descricao));
+        log.info("Pauta criada: id={}, titulo={}", pauta.getId(), titulo);
+        return pauta;
     }
 
     public Pauta buscarPorId(Long id) {
@@ -39,11 +43,14 @@ public class PautaService {
     public Pauta abrirSessao(Long pautaId, Long duracaoSegundos) {
         Pauta pauta = buscarPorId(pautaId);
         if (pauta.sessaoFoiAberta()) {
+            log.warn("Tentativa de abrir sessão já aberta: pautaId={}", pautaId);
             throw new SessaoJaAbertaException(pautaId);
         }
         long duracao = duracaoSegundos != null ? duracaoSegundos : DURACAO_PADRAO_SEGUNDOS;
         pauta.abrirSessao(duracao);
-        return pautaRepository.save(pauta);
+        Pauta pautaSalva = pautaRepository.save(pauta);
+        log.info("Sessão aberta: pautaId={}, duracao={}s", pautaId, duracao);
+        return pautaSalva;
     }
 
     public ResultadoPautaDto apurarResultado(Long pautaId) {

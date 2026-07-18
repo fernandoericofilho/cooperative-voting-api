@@ -67,4 +67,32 @@ class WebClientUserInfoClientTest {
         assertThatThrownBy(() -> client.consultar("11111111111"))
             .isInstanceOf(IntegracaoExternaIndisponivelException.class);
     }
+
+    @Test
+    void statusDesconhecidoLancaIllegalArgumentException() {
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("{\"status\":\"DESCONHECIDO\"}")
+            .addHeader("Content-Type", "application/json"));
+
+        assertThatThrownBy(() -> client.consultar("12345678900"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Status desconhecido");
+    }
+
+    @Test
+    void statusLowercaseSedoProcessadoCorretamente() {
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("{\"status\":\"habilitado\"}")
+            .addHeader("Content-Type", "application/json"));
+
+        assertThat(client.consultar("19839091069")).isEqualTo(StatusVotacao.HABILITADO);
+    }
+
+    @Test
+    void statusNullLancaIllegalArgumentException() {
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("{\"status\":null}")
+            .addHeader("Content-Type", "application/json"));
+
+        assertThatThrownBy(() -> client.consultar("12345678900"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("nulo");
+    }
 }
