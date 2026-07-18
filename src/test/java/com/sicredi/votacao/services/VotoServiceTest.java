@@ -76,7 +76,7 @@ class VotoServiceTest {
         pauta.abrirSessao(60L);
         when(pautaService.buscarPorId(1L)).thenReturn(pauta);
         when(votoRepository.existsByPautaIdAndCpfAssociado(1L, "11122233344")).thenReturn(false);
-        when(userInfoClient.consultar("11122233344")).thenReturn(StatusVotacao.UNABLE_TO_VOTE);
+        when(userInfoClient.consultar("11122233344")).thenReturn(StatusVotacao.NAO_HABILITADO);
 
         assertThatThrownBy(() -> votoService.registrarVoto(1L, "11122233344", OpcaoVoto.SIM))
             .isInstanceOf(AssociadoNaoHabilitadoException.class);
@@ -88,7 +88,7 @@ class VotoServiceTest {
         pauta.abrirSessao(60L);
         when(pautaService.buscarPorId(1L)).thenReturn(pauta);
         when(votoRepository.existsByPautaIdAndCpfAssociado(1L, "11122233344")).thenReturn(false);
-        when(userInfoClient.consultar("11122233344")).thenReturn(StatusVotacao.ABLE_TO_VOTE);
+        when(userInfoClient.consultar("11122233344")).thenReturn(StatusVotacao.HABILITADO);
         when(votoRepository.save(any(Voto.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Voto voto = votoService.registrarVoto(1L, "11122233344", OpcaoVoto.SIM);

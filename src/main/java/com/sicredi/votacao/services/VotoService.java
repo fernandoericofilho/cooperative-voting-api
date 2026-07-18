@@ -37,7 +37,7 @@ public class VotoService {
         if (votoRepository.existsByPautaIdAndCpfAssociado(pautaId, cpfAssociado)) {
             throw new VotoDuplicadoException(pautaId, cpfAssociado);
         }
-        if (userInfoClient.consultar(cpfAssociado) == StatusVotacao.UNABLE_TO_VOTE) {
+        if (userInfoClient.consultar(cpfAssociado) == StatusVotacao.NAO_HABILITADO) {
             throw new AssociadoNaoHabilitadoException(cpfAssociado);
         }
 

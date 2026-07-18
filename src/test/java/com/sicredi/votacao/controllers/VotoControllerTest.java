@@ -49,7 +49,7 @@ class VotoControllerTest {
 
     @Test
     void registrarVotoReturnsVotoDTOWithCreatedStatus() throws Exception {
-        when(userInfoClient.consultar("12345678901")).thenReturn(StatusVotacao.ABLE_TO_VOTE);
+        when(userInfoClient.consultar("12345678901")).thenReturn(StatusVotacao.HABILITADO);
 
         RegistrarVotoRequest request = new RegistrarVotoRequest("12345678901", "SIM");
 

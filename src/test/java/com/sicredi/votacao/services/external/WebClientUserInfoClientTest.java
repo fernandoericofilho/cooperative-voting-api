@@ -35,19 +35,19 @@ class WebClientUserInfoClientTest {
     }
 
     @Test
-    void cpfHabilitadoRetornaAbleToVote() {
-        server.enqueue(new MockResponse().setResponseCode(200).setBody("{\"status\":\"ABLE_TO_VOTE\"}")
+    void cpfHabilitadoRetornaHabilitado() {
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("{\"status\":\"HABILITADO\"}")
             .addHeader("Content-Type", "application/json"));
 
-        assertThat(client.consultar("19839091069")).isEqualTo(StatusVotacao.ABLE_TO_VOTE);
+        assertThat(client.consultar("19839091069")).isEqualTo(StatusVotacao.HABILITADO);
     }
 
     @Test
-    void cpfNaoHabilitadoRetornaUnableToVote() {
-        server.enqueue(new MockResponse().setResponseCode(200).setBody("{\"status\":\"UNABLE_TO_VOTE\"}")
+    void cpfNaoHabilitadoRetornaNaoHabilitado() {
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("{\"status\":\"NAO_HABILITADO\"}")
             .addHeader("Content-Type", "application/json"));
 
-        assertThat(client.consultar("62289608068")).isEqualTo(StatusVotacao.UNABLE_TO_VOTE);
+        assertThat(client.consultar("62289608068")).isEqualTo(StatusVotacao.NAO_HABILITADO);
     }
 
     @Test
