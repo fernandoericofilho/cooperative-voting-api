@@ -2,6 +2,7 @@ package com.sicredi.votacao.mappers;
 
 import com.sicredi.votacao.dtos.PautaDTO;
 import com.sicredi.votacao.dtos.ResultadoDTO;
+import com.sicredi.votacao.dtos.ResultadoPauta;
 import com.sicredi.votacao.dtos.VotoDTO;
 import com.sicredi.votacao.models.Pauta;
 import com.sicredi.votacao.models.Voto;
@@ -35,13 +36,12 @@ public class DomainDTOMapper {
         );
     }
 
-    public ResultadoDTO toResultadoDTO(Pauta pauta, Integer totalSim, Integer totalNao) {
-        String resultado = determineResult(totalSim, totalNao);
+    public ResultadoDTO toResultadoDTO(Pauta pauta, ResultadoPauta resultadoPauta) {
         return new ResultadoDTO(
             pauta.getId(),
-            totalSim,
-            totalNao,
-            resultado,
+            (int) resultadoPauta.votosSim(),
+            (int) resultadoPauta.votosNao(),
+            resultadoPauta.resultado(),
             calculatePautaStatus(pauta)
         );
     }
@@ -57,9 +57,4 @@ public class DomainDTOMapper {
         return "ENCERRADA";
     }
 
-    private String determineResult(Integer totalSim, Integer totalNao) {
-        if (totalSim > totalNao) return "SIM";
-        if (totalNao > totalSim) return "NAO";
-        return "EMPATADO";
-    }
 }

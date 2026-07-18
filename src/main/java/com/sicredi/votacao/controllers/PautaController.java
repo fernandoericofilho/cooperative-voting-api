@@ -46,6 +46,6 @@ public class PautaController {
     public ResponseEntity<ResultadoDTO> obterResultado(@PathVariable Long id) {
         Pauta pauta = pautaService.buscarPorId(id);
         var resultado = pautaService.apurarResultado(id);
-        return ResponseEntity.ok(mapper.toResultadoDTO(pauta, (int) resultado.votosSim(), (int) resultado.votosNao()));
+        return ResponseEntity.ok(mapper.toResultadoDTO(pauta, resultado));
     }
 }

@@ -84,6 +84,8 @@ class PautaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pautaId", is(saved.getId().intValue())))
                 .andExpect(jsonPath("$.status", is("ABERTA")))
-                .andExpect(jsonPath("$.resultado").exists());
+                .andExpect(jsonPath("$.resultado", is("EMPATE")))
+                .andExpect(jsonPath("$.totalSim", is(0)))
+                .andExpect(jsonPath("$.totalNao", is(0)));
     }
 }
