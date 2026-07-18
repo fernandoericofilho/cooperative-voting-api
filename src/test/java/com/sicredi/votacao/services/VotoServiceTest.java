@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
 class VotoServiceTest {
@@ -64,7 +65,9 @@ class VotoServiceTest {
         Pauta pauta = new Pauta("Pauta", "desc");
         pauta.abrirSessao(60L);
         when(pautaService.buscarPorId(1L)).thenReturn(pauta);
-        when(votoRepository.existsByPautaIdAndCpfAssociado(1L, "11122233344")).thenReturn(true);
+        when(userInfoClient.consultar("11122233344")).thenReturn(StatusVotacao.HABILITADO);
+        when(votoRepository.save(any(Voto.class)))
+            .thenThrow(new DataIntegrityViolationException("Violação de constraint único: uk_voto_pauta_cpf"));
 
         assertThatThrownBy(() -> votoService.registrarVoto(1L, "11122233344", OpcaoVoto.SIM))
             .isInstanceOf(VotoDuplicadoException.class);
@@ -75,7 +78,6 @@ class VotoServiceTest {
         Pauta pauta = new Pauta("Pauta", "desc");
         pauta.abrirSessao(60L);
         when(pautaService.buscarPorId(1L)).thenReturn(pauta);
-        when(votoRepository.existsByPautaIdAndCpfAssociado(1L, "11122233344")).thenReturn(false);
         when(userInfoClient.consultar("11122233344")).thenReturn(StatusVotacao.NAO_HABILITADO);
 
         assertThatThrownBy(() -> votoService.registrarVoto(1L, "11122233344", OpcaoVoto.SIM))
@@ -87,7 +89,6 @@ class VotoServiceTest {
         Pauta pauta = new Pauta("Pauta", "desc");
         pauta.abrirSessao(60L);
         when(pautaService.buscarPorId(1L)).thenReturn(pauta);
-        when(votoRepository.existsByPautaIdAndCpfAssociado(1L, "11122233344")).thenReturn(false);
         when(userInfoClient.consultar("11122233344")).thenReturn(StatusVotacao.HABILITADO);
         when(votoRepository.save(any(Voto.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

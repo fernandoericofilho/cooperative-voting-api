@@ -63,4 +63,25 @@ class VotoControllerTest {
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.criadoEm").isNotEmpty());
     }
+
+    @Test
+    void registrarVotoDuplicadoRetornsConflictStatus() throws Exception {
+        when(userInfoClient.consultar("12345678901")).thenReturn(StatusVotacao.HABILITADO);
+
+        RegistrarVotoRequest request = new RegistrarVotoRequest("12345678901", "SIM");
+
+        // First vote succeeds
+        mockMvc.perform(post("/api/v1/pautas/" + pautaAberta.getId() + "/votos")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+
+        // Second vote from the same associado should return 409 CONFLICT
+        mockMvc.perform(post("/api/v1/pautas/" + pautaAberta.getId() + "/votos")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status", is(409)))
+                .andExpect(jsonPath("$.message", containsString("já votou na pauta")));
+    }
 }
