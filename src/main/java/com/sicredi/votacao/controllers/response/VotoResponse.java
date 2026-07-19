@@ -1,7 +1,6 @@
 package com.sicredi.votacao.controllers.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VotoResponse {
@@ -9,9 +8,9 @@ public class VotoResponse {
     private Long pautaId;
     private String cpfAssociado;
     private String voto;
-    private LocalDateTime criadoEm;
+    private String criadoEm;
 
-    public VotoResponse(Long id, Long pautaId, String cpfAssociado, String voto, LocalDateTime criadoEm) {
+    public VotoResponse(Long id, Long pautaId, String cpfAssociado, String voto, String criadoEm) {
         this.id = id;
         this.pautaId = pautaId;
         this.cpfAssociado = cpfAssociado;
@@ -24,5 +23,5 @@ public class VotoResponse {
     public Long getPautaId() { return pautaId; }
     public String getCpfAssociado() { return cpfAssociado; }
     public String getVoto() { return voto; }
-    public LocalDateTime getCriadoEm() { return criadoEm; }
+    public String getCriadoEm() { return criadoEm; }
 }

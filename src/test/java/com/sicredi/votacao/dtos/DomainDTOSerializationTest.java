@@ -7,16 +7,18 @@ import com.sicredi.votacao.controllers.response.VotoResponse;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class DomainDTOSerializationTest {
 
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Test
     void pautaDTOSerializesCorrectly() throws Exception {
-        LocalDateTime now = LocalDateTime.now();
+        String now = LocalDateTime.now().format(FORMATTER);
         PautaResponse pauta = new PautaResponse(1L, "Título", "Descrição", now, null, null, "NAO_INICIADA");
 
         String json = mapper.writeValueAsString(pauta);
@@ -27,7 +29,7 @@ class DomainDTOSerializationTest {
 
     @Test
     void votoDTOSerializesCorrectly() throws Exception {
-        LocalDateTime now = LocalDateTime.now();
+        String now = LocalDateTime.now().format(FORMATTER);
         VotoResponse voto = new VotoResponse(1L, 1L, "12345678901", "SIM", now);
 
         String json = mapper.writeValueAsString(voto);

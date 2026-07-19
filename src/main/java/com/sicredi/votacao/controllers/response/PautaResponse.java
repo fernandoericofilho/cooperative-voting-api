@@ -1,20 +1,19 @@
 package com.sicredi.votacao.controllers.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PautaResponse {
     private Long id;
     private String titulo;
     private String descricao;
-    private LocalDateTime criadoEm;
-    private LocalDateTime sessaoAbertaEm;
-    private LocalDateTime sessaoFechaEm;
+    private String criadoEm;
+    private String sessaoAbertaEm;
+    private String sessaoFechaEm;
     private String status;
 
-    public PautaResponse(Long id, String titulo, String descricao, LocalDateTime criadoEm,
-                    LocalDateTime sessaoAbertaEm, LocalDateTime sessaoFechaEm, String status) {
+    public PautaResponse(Long id, String titulo, String descricao, String criadoEm,
+                    String sessaoAbertaEm, String sessaoFechaEm, String status) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -28,8 +27,8 @@ public class PautaResponse {
     public Long getId() { return id; }
     public String getTitulo() { return titulo; }
     public String getDescricao() { return descricao; }
-    public LocalDateTime getCriadoEm() { return criadoEm; }
-    public LocalDateTime getSessaoAbertaEm() { return sessaoAbertaEm; }
-    public LocalDateTime getSessaoFechaEm() { return sessaoFechaEm; }
+    public String getCriadoEm() { return criadoEm; }
+    public String getSessaoAbertaEm() { return sessaoAbertaEm; }
+    public String getSessaoFechaEm() { return sessaoFechaEm; }
     public String getStatus() { return status; }
 }
