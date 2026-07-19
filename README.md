@@ -5,11 +5,10 @@ API REST em Java/Spring Boot para gerenciar pautas e sessões de votação coope
 ## 🚀 Como Rodar
 
 ### Pré-requisitos
-- Java 17+
-- Docker & Docker Compose (opcional, para rodar com PostgreSQL)
+- Docker & Docker Compose
 - Postman ou curl (para testar endpoints)
 
-### Opção 1: Com Docker Compose (Recomendado)
+### Com Docker Compose (Recomendado)
 
 ```bash
 docker-compose up --build
@@ -19,28 +18,13 @@ A aplicação subirá em: **http://localhost:8080**
 
 - Banco de dados: PostgreSQL (porta 5432)
 - Flyway executa migrations automaticamente
+- Volume persistente: `votacao_db_volume`
 
-### Opção 2: Localmente com H2 (Em Memória)
-
-```bash
-./gradlew bootRun --args='--spring.profiles.active=local'
-```
-
-Ou no Windows:
-```bash
-gradlew.bat bootRun --args='--spring.profiles.active=local'
-```
-
-A aplicação subirá em: **http://localhost:8080**
-
-- Banco de dados: H2 em arquivo (`./data/votacao.db`)
-- Ideal para desenvolvimento sem Docker
-
-### Opção 3: Build e execução JAR
+### Build JAR (Opcional)
 
 ```bash
 ./gradlew clean build
-java -jar build/libs/votacao-0.0.1-SNAPSHOT.jar
+java -jar build/libs/votacao-0.0.1-SNAPSHOT.jar --spring.datasource.url=jdbc:postgresql://localhost:5432/votacao
 ```
 
 ---
@@ -431,12 +415,6 @@ chmod +x gradlew          # Garantir permissão executável
 docker-compose up --build
 ```
 
-**Alternativa rápida (sem Docker):**
-Se Docker continuar falhando, use a opção local:
-```bash
-./gradlew bootRun --args='--spring.profiles.active=local'
-```
-
 ---
 
 **Erro ao rodar docker-compose: "Port 8080 already in use"**
@@ -452,21 +430,14 @@ docker-compose down           # Para containers
 docker-compose up --build     # Reinicia do zero
 ```
 
-**Testes falhando com H2**
-Certifique-se que não há dados sujos de execuções anteriores:
-```bash
-rm -f data/votacao.db         # Remove arquivo H2
-./gradlew clean test          # Limpa e reexecuta
-```
-
 **Swagger não carrega em http://localhost:8080/swagger-ui.html**
 Verifique se a aplicação está rodando:
 ```bash
-curl http://localhost:8080/api/v1/pautas  # Se retornar [], app está ok
+curl http://localhost:8080/api/v1/pautas
 ```
 Se não retornar nada:
-- Verifique logs: `./gradlew bootRun --args='--spring.profiles.active=local'`
-- Espere 15-20s após iniciar (Spring Boot + migrations Flyway levam tempo)
+- Verifique logs: `docker-compose logs app`
+- Espere 15-20s após iniciar (Spring Boot + Flyway levam tempo)
 
 ---
 
@@ -475,7 +446,7 @@ Se não retornar nada:
 - **Linguagem:** Java 17
 - **Framework:** Spring Boot 3.x
 - **Build:** Gradle (Kotlin DSL)
-- **Banco de Dados:** PostgreSQL (prod) / H2 (dev/test)
+- **Banco de Dados:** PostgreSQL
 - **Migrations:** Flyway
 - **Testing:** JUnit 5, Mockito, Spring Test
 - **Documentação API:** Springdoc-OpenAPI (Swagger UI)
