@@ -2,6 +2,7 @@ package com.sicredi.votacao.controllers.response;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ResponseCoverageTest {
@@ -130,5 +131,65 @@ class ResponseCoverageTest {
             .hasFieldOrPropertyWithValue("totalNao", 10)
             .hasFieldOrPropertyWithValue("resultado", "APROVADO")
             .hasFieldOrPropertyWithValue("status", "ABERTA");
+    }
+
+    @Test
+    void pautasListResponseConstructorAndAllGetters() {
+        List<PautaResponse> content = List.of(
+            new PautaResponse(1L, "Pauta1", "Desc1", "2026-01-01T10:00:00",
+                              "2026-01-01T10:00:00", "2026-01-01T11:00:00", "ABERTA")
+        );
+
+        PautasListResponse response = new PautasListResponse(
+            content, 100L, 5, 1, 20, true, false
+        );
+
+        assertThat(response.getContent()).isEqualTo(content);
+        assertThat(response.getTotalElements()).isEqualTo(100L);
+        assertThat(response.getTotalPages()).isEqualTo(5);
+        assertThat(response.getCurrentPage()).isEqualTo(1);
+        assertThat(response.getPageSize()).isEqualTo(20);
+        assertThat(response.isHasNext()).isTrue();
+        assertThat(response.isHasPrevious()).isFalse();
+    }
+
+    @Test
+    void pautasListResponseWithMultiplePautas() {
+        List<PautaResponse> content = List.of(
+            new PautaResponse(1L, "Pauta1", "Desc1", "2026-01-01T10:00:00",
+                              "2026-01-01T10:00:00", "2026-01-01T11:00:00", "ABERTA"),
+            new PautaResponse(2L, "Pauta2", "Desc2", "2026-01-01T10:00:00",
+                              "2026-01-01T10:00:00", "2026-01-01T11:00:00", "ENCERRADA")
+        );
+
+        PautasListResponse response = new PautasListResponse(
+            content, 200L, 10, 2, 20, true, true
+        );
+
+        assertThat(response.getContent()).hasSize(2);
+        assertThat(response.getTotalElements()).isEqualTo(200L);
+        assertThat(response.getCurrentPage()).isEqualTo(2);
+        assertThat(response.isHasNext()).isTrue();
+        assertThat(response.isHasPrevious()).isTrue();
+    }
+
+    @Test
+    void pageResponseConstructor() {
+        List<PautaResponse> content = List.of(
+            new PautaResponse(1L, "Pauta1", "Desc1", "2026-01-01T10:00:00",
+                              "2026-01-01T10:00:00", "2026-01-01T11:00:00", "ABERTA")
+        );
+
+        PageResponse<PautaResponse> response = new PageResponse<>(
+            content, 50L, 3, 1, 20, true, false
+        );
+
+        assertThat(response.content()).isEqualTo(content);
+        assertThat(response.totalElements()).isEqualTo(50L);
+        assertThat(response.totalPages()).isEqualTo(3);
+        assertThat(response.currentPage()).isEqualTo(1);
+        assertThat(response.pageSize()).isEqualTo(20);
+        assertThat(response.hasNext()).isTrue();
+        assertThat(response.hasPrevious()).isFalse();
     }
 }
