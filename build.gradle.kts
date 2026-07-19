@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
+    id("jacoco")
 }
 
 group = "com.sicredi"
@@ -33,6 +34,7 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
+    testImplementation("com.h2database:h2")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
@@ -40,5 +42,15 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-    systemProperty("spring.profiles.active", System.getProperty("spring.profiles.active", "local"))
+    systemProperty("spring.profiles.active", System.getProperty("spring.profiles.active", "test"))
+    finalizedBy("jacocoTestReport")
+}
+
+tasks.jacocoTestReport {
+    dependsOn("test")
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
 }

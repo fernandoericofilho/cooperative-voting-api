@@ -14,7 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("local")
+@ActiveProfiles("test")
 class VotoRepositoryTest {
 
     @Autowired
