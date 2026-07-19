@@ -31,4 +31,5 @@ class VotoMapperTest {
 
         assertThat(response.getVoto()).isEqualTo("NAO");
     }
+
 }
