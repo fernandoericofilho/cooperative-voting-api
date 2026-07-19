@@ -3,6 +3,7 @@ package com.sicredi.votacao.controllers;
 import com.sicredi.votacao.controllers.request.CriarPautaRequest;
 import com.sicredi.votacao.controllers.request.AbrirSessaoRequest;
 import com.sicredi.votacao.controllers.response.PautaResponse;
+import com.sicredi.votacao.controllers.response.PageResponse;
 import com.sicredi.votacao.controllers.response.ResultadoVotacaoResponse;
 import com.sicredi.votacao.mappers.PautaMapper;
 import com.sicredi.votacao.mappers.ResultadoVotacaoMapper;
@@ -38,7 +39,7 @@ public class PautaController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PautaResponse>> listarPautas(
+    public ResponseEntity<PageResponse<PautaResponse>> listarPautas(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -46,7 +47,18 @@ public class PautaController {
         Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
         Page<Pauta> pautas = pautaService.listarPautas(pageable);
-        Page<PautaResponse> response = pautas.map(pautaMapper::toPautaDTO);
+        var pautasResponse = pautas.stream()
+            .map(pautaMapper::toPautaDTO)
+            .toList();
+        PageResponse<PautaResponse> response = new PageResponse<>(
+            pautasResponse,
+            pautas.getTotalElements(),
+            pautas.getTotalPages(),
+            pautas.getNumber(),
+            pautas.getSize(),
+            pautas.hasNext(),
+            pautas.hasPrevious()
+        );
         return ResponseEntity.ok(response);
     }
 
