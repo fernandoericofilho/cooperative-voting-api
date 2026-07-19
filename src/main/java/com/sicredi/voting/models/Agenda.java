@@ -60,4 +60,11 @@ public class Agenda {
         this.sessionOpenedAt = LocalDateTime.now();
         this.sessionClosesAt = this.sessionOpenedAt.plusSeconds(durationSeconds);
     }
+
+    public String getStatus() {
+        if (!sessionWasOpened()) {
+            return "NOT_STARTED";
+        }
+        return sessionIsOpen() ? "OPEN" : "CLOSED";
+    }
 }
