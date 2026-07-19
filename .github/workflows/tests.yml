@@ -35,8 +35,8 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Run tests
-      run: ./gradlew test --no-daemon
+    - name: Run tests with coverage
+      run: ./gradlew test jacocoTestReport --no-daemon
 
     - name: Upload test results
       if: always()
@@ -44,6 +44,22 @@ jobs:
       with:
         name: test-results
         path: build/reports/tests/test/
+
+    - name: Upload coverage report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: build/reports/jacoco/test/html/
+
+    - name: Verify code coverage
+      run: |
+        COVERAGE=$(grep -o "<counter type=\"LINE\" missed=\"[0-9]*\" covered=\"[0-9]*\"" build/reports/jacoco/test/jacocoTestReport.xml | tail -1 | awk -F'"' '{missed=$4; covered=$8; pct=(covered*100)/(missed+covered); printf "%.1f", pct}')
+        echo "Code Coverage: ${COVERAGE}%"
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "ERROR: Code coverage ${COVERAGE}% is below 80% threshold"
+          exit 1
+        fi
 
     - name: Build with Gradle
       run: ./gradlew build -x test --no-daemon
