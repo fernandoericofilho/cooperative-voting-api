@@ -54,12 +54,35 @@ jobs:
 
     - name: Verify code coverage
       run: |
-        COVERAGE=$(grep -o "<counter type=\"LINE\" missed=\"[0-9]*\" covered=\"[0-9]*\"" build/reports/jacoco/test/jacocoTestReport.xml | tail -1 | awk -F'"' '{missed=$4; covered=$8; pct=(covered*100)/(missed+covered); printf "%.1f", pct}')
-        echo "Code Coverage: ${COVERAGE}%"
-        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-          echo "ERROR: Code coverage ${COVERAGE}% is below 80% threshold"
-          exit 1
-        fi
+        python3 << 'EOF'
+        import xml.etree.ElementTree as ET
+        import sys
+
+        tree = ET.parse('build/reports/jacoco/test/jacocoTestReport.xml')
+        root = tree.getroot()
+
+        # Get all LINE counters and find the last one (total)
+        counters = root.findall('.//counter[@type="LINE"]')
+        if counters:
+            last = counters[-1]
+            missed = int(last.get('missed', 0))
+            covered = int(last.get('covered', 0))
+            total = missed + covered
+            if total > 0:
+                coverage = (covered * 100.0) / total
+                print(f'Code Coverage: {coverage:.1f}%')
+                if coverage < 80:
+                    print(f'ERROR: Code coverage {coverage:.1f}% is below 80% threshold')
+                    sys.exit(1)
+                else:
+                    print(f'✓ Coverage {coverage:.1f}% meets 80% minimum')
+            else:
+                print('ERROR: No coverage data found')
+                sys.exit(1)
+        else:
+            print('ERROR: No LINE counter found in Jacoco report')
+            sys.exit(1)
+        EOF
 
     - name: Build with Gradle
       run: ./gradlew build -x test --no-daemon
