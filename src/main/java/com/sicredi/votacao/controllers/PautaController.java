@@ -3,7 +3,7 @@ package com.sicredi.votacao.controllers;
 import com.sicredi.votacao.controllers.request.CriarPautaRequest;
 import com.sicredi.votacao.controllers.request.AbrirSessaoRequest;
 import com.sicredi.votacao.controllers.response.PautaResponse;
-import com.sicredi.votacao.controllers.response.PageResponse;
+import com.sicredi.votacao.controllers.response.PautasListResponse;
 import com.sicredi.votacao.controllers.response.ResultadoVotacaoResponse;
 import com.sicredi.votacao.mappers.PautaMapper;
 import com.sicredi.votacao.mappers.ResultadoVotacaoMapper;
@@ -39,26 +39,29 @@ public class PautaController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<PautaResponse>> listarPautas(
+    public ResponseEntity<PautasListResponse> listarPautas(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection) {
         Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        Page<Pauta> pautas = pautaService.listarPautas(pageable);
-        var pautasResponse = pautas.stream()
+        Page<Pauta> pautasPage = pautaService.listarPautas(pageable);
+
+        var pautasResponse = pautasPage.stream()
             .map(pautaMapper::toPautaDTO)
             .toList();
-        PageResponse<PautaResponse> response = new PageResponse<>(
+
+        PautasListResponse response = new PautasListResponse(
             pautasResponse,
-            pautas.getTotalElements(),
-            pautas.getTotalPages(),
-            pautas.getNumber(),
-            pautas.getSize(),
-            pautas.hasNext(),
-            pautas.hasPrevious()
+            pautasPage.getTotalElements(),
+            pautasPage.getTotalPages(),
+            pautasPage.getNumber(),
+            pautasPage.getSize(),
+            pautasPage.hasNext(),
+            pautasPage.hasPrevious()
         );
+
         return ResponseEntity.ok(response);
     }
 
