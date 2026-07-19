@@ -202,26 +202,19 @@ GET http://localhost:8080/api/v1/pautas/999
 
 ---
 
-## 🧪 Testes
+## 🧪 Testes (Unit Tests Puros)
 
-### Rodar Todos os Testes
+### Rodar Testes
 ```bash
 ./gradlew test
 ```
 
-### Gerar Relatório Jacoco de Cobertura
-```bash
-./gradlew test --continue
-./gradlew jacocoTestReport
-```
+✅ **3 Unit Tests** (sem dependências externas):
+- `DomainDTOSerializationTest`: Validação de serialização de respostas
+- `GlobalExceptionHandlerTest`: Testes de tratamento de exceções
+- `WebClientUserInfoClientTest`: Testes de cliente HTTP com mocks
 
-Relatório disponível em: `build/reports/jacoco/test/html/index.html`
-
-### Tipos de Testes
-- **Unit Tests**: Services, mappers, repositories
-- **Integration Tests**: Controllers (MockMvc com H2)
-- **Scenario Tests**: Validation errors, business logic, error handling
-- **Current Status**: 49/56 tests passing (87% pass rate)
+**Princípio:** Testes são **100% independentes** - executam em qualquer lugar sem PostgreSQL, H2 ou Docker.
 
 ---
 
