@@ -6,12 +6,19 @@ API REST completa para gerenciar votações cooperativas em Spring Boot 3.x com 
 
 ## 🚀 Início Rápido
 
-### Pré-requisitos
+### 1️⃣ Clone o Repositório
+
+```bash
+git clone https://github.com/fernandoericofilho/cooperative-voting-api.git
+cd cooperative-voting-api
+```
+
+### 2️⃣ Pré-requisitos
 - **Java 17+** (JDK)
 - **Docker & Docker Compose**
 - Postman ou curl (para testar endpoints)
 
-### Com Docker Compose (Recomendado)
+### 3️⃣ Rode com Docker Compose (Recomendado)
 
 ```bash
 docker-compose up --build
@@ -43,14 +50,14 @@ docs/postman/cooperative-voting-api.postman_collection.json
 
 Contém **11 requests** cobrindo todos os cenários (sucesso, erro, versionamento).
 
-### Build JAR (Opcional)
+### 4️⃣ Build JAR (Opcional - Sem Docker)
 
 ```bash
 ./gradlew clean build
 java -jar build/libs/votacao-0.0.1-SNAPSHOT.jar --spring.datasource.url=jdbc:postgresql://localhost:5432/votacao
 ```
 
-### ⚡ Teste Rápido (30 segundos)
+### 5️⃣ ⚡ Teste Rápido (30 segundos)
 
 Depois de rodar `docker-compose up`, execute no terminal (ou veja [guia completo](./docs/TESTS.md)):
 
