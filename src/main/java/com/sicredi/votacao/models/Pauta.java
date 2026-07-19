@@ -6,10 +6,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "pauta")
+@Getter
+@Setter
 public class Pauta {
 
     @Id
@@ -38,30 +42,6 @@ public class Pauta {
         this.titulo = titulo;
         this.descricao = descricao;
         this.criadaEm = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public LocalDateTime getCriadaEm() {
-        return criadaEm;
-    }
-
-    public LocalDateTime getSessaoAbertaEm() {
-        return sessaoAbertaEm;
-    }
-
-    public LocalDateTime getSessaoFechaEm() {
-        return sessaoFechaEm;
     }
 
     public boolean sessaoFoiAberta() {

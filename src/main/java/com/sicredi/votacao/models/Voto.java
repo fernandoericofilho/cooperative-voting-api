@@ -10,10 +10,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "voto", uniqueConstraints = @UniqueConstraint(name = "uk_voto_pauta_cpf", columnNames = {"pauta_id", "cpf_associado"}))
+@Getter
+@Setter
 public class Voto {
 
     @Id
@@ -41,25 +45,5 @@ public class Voto {
         this.cpfAssociado = cpfAssociado;
         this.voto = voto;
         this.criadoEm = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getPautaId() {
-        return pautaId;
-    }
-
-    public String getCpfAssociado() {
-        return cpfAssociado;
-    }
-
-    public OpcaoVoto getVoto() {
-        return voto;
-    }
-
-    public LocalDateTime getCriadoEm() {
-        return criadoEm;
     }
 }

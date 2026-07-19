@@ -101,6 +101,7 @@ class PautaServiceTest {
     @Test
     void apurarResultadoComVotosSim() {
         Pauta pauta = new Pauta("Reforma", "Desc");
+        when(pautaRepository.findById(1L)).thenReturn(Optional.of(pauta));
         com.sicredi.votacao.dtos.ContagemVoto contagem1 = mock(com.sicredi.votacao.dtos.ContagemVoto.class);
         com.sicredi.votacao.dtos.ContagemVoto contagem2 = mock(com.sicredi.votacao.dtos.ContagemVoto.class);
         when(contagem1.getOpcao()).thenReturn(OpcaoVoto.SIM);
