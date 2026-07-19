@@ -62,7 +62,7 @@ logging:
     root: INFO
     org.springframework.web: INFO
     org.hibernate: WARN
-    com.sicredi.votacao: INFO
+    com.sicredi.voting: INFO
 
 springdoc:
   swagger-ui:
