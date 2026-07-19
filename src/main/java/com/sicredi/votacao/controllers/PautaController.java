@@ -39,7 +39,7 @@ public class PautaController {
     }
 
     @GetMapping
-    public ResponseEntity<PautasListResponse> listarPautas(
+    public ResponseEntity<?> listarPautas(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -52,17 +52,17 @@ public class PautaController {
             .map(pautaMapper::toPautaDTO)
             .toList();
 
-        PautasListResponse response = new PautasListResponse(
-            pautasResponse,
-            pautasPage.getTotalElements(),
-            pautasPage.getTotalPages(),
-            pautasPage.getNumber(),
-            pautasPage.getSize(),
-            pautasPage.hasNext(),
-            pautasPage.hasPrevious()
-        );
+        // Return clean Map without Spring Data fields
+        var response = new java.util.LinkedHashMap<String, Object>();
+        response.put("content", pautasResponse);
+        response.put("totalElements", pautasPage.getTotalElements());
+        response.put("totalPages", pautasPage.getTotalPages());
+        response.put("currentPage", pautasPage.getNumber());
+        response.put("pageSize", pautasPage.getSize());
+        response.put("hasNext", pautasPage.hasNext());
+        response.put("hasPrevious", pautasPage.hasPrevious());
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/{id}")
