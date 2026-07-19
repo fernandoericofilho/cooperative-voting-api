@@ -3,6 +3,7 @@ package com.sicredi.votacao.services.external;
 import com.sicredi.votacao.enums.StatusVotacao;
 import com.sicredi.votacao.exceptions.CpfInvalidoException;
 import com.sicredi.votacao.exceptions.IntegracaoExternaIndisponivelException;
+import com.sicredi.votacao.services.util.CpfUtils;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class WebClientUserInfoClient implements UserInfoClient {
     @Override
     @CircuitBreaker(name = "userInfoClient", fallbackMethod = "consultarFallback")
     public StatusVotacao consultar(String cpf) {
-        String maskedCpf = maskCpf(cpf);
+        String maskedCpf = CpfUtils.mask(cpf);
         log.info("Consultando elegibilidade do associado: {}", maskedCpf);
 
         try {
@@ -96,15 +97,8 @@ public class WebClientUserInfoClient implements UserInfoClient {
         return !(throwable instanceof WebClientResponseException.NotFound);
     }
 
-    private String maskCpf(String cpf) {
-        if (cpf == null || cpf.length() < 4) {
-            return "****";
-        }
-        return cpf.substring(0, 3) + ".***.***-" + cpf.substring(cpf.length() - 2);
-    }
-
     StatusVotacao consultarFallback(String cpf, Exception ex) {
-        String maskedCpf = maskCpf(cpf);
+        String maskedCpf = CpfUtils.mask(cpf);
         log.error("Circuit breaker aberto para elegibilidade. Falha: {}", ex.getMessage());
         throw new IntegracaoExternaIndisponivelException("Serviço de elegibilidade indisponível", ex);
     }

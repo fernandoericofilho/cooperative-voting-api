@@ -10,6 +10,7 @@ import com.sicredi.votacao.models.Pauta;
 import com.sicredi.votacao.models.Voto;
 import com.sicredi.votacao.repositories.VotoRepository;
 import com.sicredi.votacao.services.external.UserInfoClient;
+import com.sicredi.votacao.services.util.CpfUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class VotoService {
     }
 
     public Voto registrarVoto(Long pautaId, String cpfAssociado, OpcaoVoto voto) {
-        String maskedCpf = maskCpf(cpfAssociado);
+        String maskedCpf = CpfUtils.mask(cpfAssociado);
         Pauta pauta = pautaService.buscarPorId(pautaId);
 
         if (!pauta.sessaoFoiAberta()) {
@@ -55,12 +56,5 @@ public class VotoService {
             log.warn("Voto duplicado detectado (violação de constraint único): pautaId={}, associado={}", pautaId, maskedCpf);
             throw new VotoDuplicadoException(pautaId, cpfAssociado);
         }
-    }
-
-    private String maskCpf(String cpf) {
-        if (cpf == null || cpf.length() < 4) {
-            return "****";
-        }
-        return cpf.substring(0, 3) + ".***.***-" + cpf.substring(cpf.length() - 2);
     }
 }
