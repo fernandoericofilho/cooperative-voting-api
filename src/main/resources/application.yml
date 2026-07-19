@@ -41,16 +41,28 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+  metrics:
+    export:
+      simple:
+        enabled: true
 
 logging:
   level:
     root: INFO
     org.springframework.web: INFO
     org.hibernate: WARN
+    com.sicredi.votacao: INFO
 
 springdoc:
   swagger-ui:
@@ -60,4 +72,4 @@ springdoc:
     tagsSorter: alpha
   api-docs:
     path: /v3/api-docs
-  show-actuator: false
+  show-actuator: true
