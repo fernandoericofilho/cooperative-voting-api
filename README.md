@@ -202,6 +202,29 @@ GET http://localhost:8080/api/v1/pautas/999
 
 ---
 
+## 🧪 Testes
+
+### Rodar Todos os Testes
+```bash
+./gradlew test
+```
+
+### Gerar Relatório Jacoco de Cobertura
+```bash
+./gradlew test --continue
+./gradlew jacocoTestReport
+```
+
+Relatório disponível em: `build/reports/jacoco/test/html/index.html`
+
+### Tipos de Testes
+- **Unit Tests**: Services, mappers, repositories
+- **Integration Tests**: Controllers (MockMvc com H2)
+- **Scenario Tests**: Validation errors, business logic, error handling
+- **Current Status**: 49/56 tests passing (87% pass rate)
+
+---
+
 ## 🏗️ Arquitetura
 
 ### Padrão de Camadas
