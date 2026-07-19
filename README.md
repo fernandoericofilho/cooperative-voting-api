@@ -7,7 +7,8 @@ API REST completa para gerenciar votações cooperativas em Spring Boot 3.x com 
 ## 🚀 Início Rápido
 
 ### Pré-requisitos
-- Docker & Docker Compose
+- **Java 17+** (JDK)
+- **Docker & Docker Compose**
 - Postman ou curl (para testar endpoints)
 
 ### Com Docker Compose (Recomendado)
