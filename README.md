@@ -22,6 +22,26 @@ A aplicação subirá em: **http://localhost:8080**
 - Flyway executa migrations automaticamente
 - Volume persistente: `votacao_db_volume`
 
+### 🔗 Links Rápidos (Após `docker-compose up`)
+
+| Recurso | Link |
+|---------|------|
+| 🌐 **API Base v1** | http://localhost:8080/api/v1 |
+| 🌐 **API Base v2** | http://localhost:8080/api/v2 |
+| 📚 **Swagger UI** | http://localhost:8080/swagger-ui.html |
+| 💚 **Health Check** | http://localhost:8080/actuator/health |
+| 📊 **Métricas** | http://localhost:8080/actuator/metrics |
+| 🗂️ **BD PostgreSQL** | localhost:5432 (user: votacao) |
+
+### 📝 Postman Collection
+
+Importe em seu Postman:
+```
+docs/postman/cooperative-voting-api.postman_collection.json
+```
+
+Contém **11 requests** cobrindo todos os cenários (sucesso, erro, versionamento).
+
 ### Build JAR (Opcional)
 
 ```bash
@@ -31,7 +51,7 @@ java -jar build/libs/votacao-0.0.1-SNAPSHOT.jar --spring.datasource.url=jdbc:pos
 
 ### ⚡ Teste Rápido (30 segundos)
 
-Depois de rodar `docker-compose up`, execute no terminal (ou veja [TESTING.md](./TESTING.md) para mais detalhes):
+Depois de rodar `docker-compose up`, execute no terminal (ou veja [guia completo](./docs/TESTS.md)):
 
 ```bash
 # 1. Criar uma pauta
@@ -54,6 +74,35 @@ curl http://localhost:8080/api/v1/agendas/1/result
 
 # 5. Testar v2 (formato simplificado)
 curl http://localhost:8080/api/v2/agendas
+```
+
+---
+
+## 📖 Como Testar
+
+### Opção 1: Swagger UI (Interativo)
+1. Abra http://localhost:8080/swagger-ui.html
+2. Expanda cada endpoint
+3. Clique "Try it out"
+4. Preencha valores
+5. Clique "Execute"
+
+### Opção 2: Postman (Recomendado)
+1. Abra Postman
+2. Importar: `File → Import → docs/postman/cooperative-voting-api.postman_collection.json`
+3. Selecione requests pré-configuradas
+4. Clique "Send"
+
+### Opção 3: cURL (Terminal)
+```bash
+# Copie/cole os comandos do guia de testes
+docs/TESTS.md → seção "Fluxo Completo"
+```
+
+### Opção 4: testes Automatizados Locais
+```bash
+./gradlew test              # Rodar 148 testes
+./gradlew jacocoTestReport  # Gerar relatório de cobertura
 ```
 
 ---
@@ -308,7 +357,7 @@ GET http://localhost:8080/api/v1/pautas/999
 
 **Princípio:** Testes são **100% independentes** - executam sem PostgreSQL, H2 ou Docker (Mockito only).
 
-**Guia prático de teste:** Consulte [TESTING.md](./TESTING.md) para:
+**Guia prático de teste:** Consulte [guia completo de testes](./docs/TESTS.md) para:
 - Exemplos de curl para cada endpoint
 - Validação de cenários de erro
 - Testes de versionamento (v1 vs v2)
@@ -463,7 +512,7 @@ Todos retornam `ErrorResponse` padronizado:
 - **100% passando:** Sem falhas, sem skips
 - **Zero dependências:** Testes usam Mockito (sem H2, sem banco)
 
-Detalhes completos: Veja [DELIVERY_REPORT.md](./DELIVERY_REPORT.md)
+Detalhes completos: Veja [Relatório de Entrega](./docs/DELIVERY.md)
 
 ---
 
