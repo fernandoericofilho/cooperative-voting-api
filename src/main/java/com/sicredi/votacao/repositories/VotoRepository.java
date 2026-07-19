@@ -9,8 +9,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface VotoRepository extends JpaRepository<Voto, Long> {
 
-    boolean existsByPautaIdAndCpfAssociado(Long pautaId, String cpfAssociado);
-
     @Query("select v.voto as opcao, count(v) as total from Voto v where v.pautaId = :pautaId group by v.voto")
     List<ContagemVoto> contarPorPauta(@Param("pautaId") Long pautaId);
 }
