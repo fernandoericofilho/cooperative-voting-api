@@ -31,7 +31,7 @@ java -jar build/libs/votacao-0.0.1-SNAPSHOT.jar --spring.datasource.url=jdbc:pos
 
 ### ⚡ Teste Rápido (30 segundos)
 
-Depois de rodar `docker-compose up`, execute no terminal:
+Depois de rodar `docker-compose up`, execute no terminal (ou veja [TESTING.md](./TESTING.md) para mais detalhes):
 
 ```bash
 # 1. Criar uma pauta
@@ -307,6 +307,11 @@ GET http://localhost:8080/api/v1/pautas/999
 - `IntegrationValidationTest` - Fluxo E2E completo
 
 **Princípio:** Testes são **100% independentes** - executam sem PostgreSQL, H2 ou Docker (Mockito only).
+
+**Guia prático de teste:** Consulte [TESTING.md](./TESTING.md) para:
+- Exemplos de curl para cada endpoint
+- Validação de cenários de erro
+- Testes de versionamento (v1 vs v2)
 
 ---
 
