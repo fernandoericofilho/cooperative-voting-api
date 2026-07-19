@@ -6,7 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
 
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 @Table(name = "pauta")
 @Getter
 @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Pauta {
 
     @Id
@@ -34,9 +37,6 @@ public class Pauta {
 
     @Column(name = "sessao_fecha_em")
     private LocalDateTime sessaoFechaEm;
-
-    protected Pauta() {
-    }
 
     public Pauta(String titulo, String descricao) {
         this.titulo = titulo;

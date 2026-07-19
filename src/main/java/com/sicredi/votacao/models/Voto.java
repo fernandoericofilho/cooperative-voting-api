@@ -10,7 +10,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
 
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 @Table(name = "voto", uniqueConstraints = @UniqueConstraint(name = "uk_voto_pauta_cpf", columnNames = {"pauta_id", "cpf_associado"}))
 @Getter
 @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Voto {
 
     @Id
@@ -36,9 +39,6 @@ public class Voto {
 
     @Column(name = "criado_em", nullable = false)
     private LocalDateTime criadoEm;
-
-    protected Voto() {
-    }
 
     public Voto(Long pautaId, String cpfAssociado, OpcaoVoto voto) {
         this.pautaId = pautaId;
