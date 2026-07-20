@@ -3,7 +3,6 @@ package com.sicredi.voting.services.external;
 import com.sicredi.voting.enums.VotingStatus;
 import com.sicredi.voting.services.util.CpfUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * Mock implementation of UserInfoClient for development/testing.
@@ -16,11 +15,10 @@ import org.springframework.stereotype.Component;
  *
  * To use the real external service when it becomes available:
  * 1. Set app.mock.enabled=false in application.yml
- * 2. Restore WebClientUserInfoClient implementation
- * 3. Update app.external.user-info-url to the correct endpoint
+ * 2. The configuration will automatically switch to WebClientUserInfoClient
+ * 3. Update app.external.user-info-url to the correct endpoint if needed
  */
 @Slf4j
-@Component
 public class MockUserInfoClient implements UserInfoClient {
 
     @Override
