@@ -36,6 +36,12 @@ jobs:
 
     - name: Run tests with coverage
       run: ./gradlew test jacocoTestReport --no-daemon
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: votacao
+        DB_USER: votacao
+        DB_PASSWORD: votacao
 
     - name: Upload test results
       if: always()
