@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      TZ: America/Sao_Paulo
 
     services:
       postgres:
@@ -17,6 +19,7 @@ jobs:
           POSTGRES_DB: votacao
           POSTGRES_USER: votacao
           POSTGRES_PASSWORD: votacao
+          PGTZ: UTC
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -37,6 +40,7 @@ jobs:
     - name: Run tests with coverage
       run: ./gradlew test jacocoTestReport --no-daemon
       env:
+        TZ: America/Sao_Paulo
         DB_HOST: localhost
         DB_PORT: 5432
         DB_NAME: votacao
