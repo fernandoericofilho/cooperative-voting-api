@@ -3,8 +3,10 @@ package com.sicredi.voting.services.external;
 import com.sicredi.voting.enums.VotingStatus;
 import com.sicredi.voting.services.util.CpfUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class MockUserInfoClient implements UserInfoClient {
 
     @Override
