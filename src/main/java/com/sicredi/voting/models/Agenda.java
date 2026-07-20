@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "agenda")
@@ -18,6 +20,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Agenda {
+
+    private static final ZoneId BRASILIA_TZ = ZoneId.of("America/Sao_Paulo");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,7 +45,7 @@ public class Agenda {
     public Agenda(String title, String description) {
         this.title = title;
         this.description = description;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(BRASILIA_TZ).toLocalDateTime();
     }
 
     public boolean sessionWasOpened() {
@@ -49,7 +53,7 @@ public class Agenda {
     }
 
     public boolean sessionIsOpen() {
-        return sessionWasOpened() && LocalDateTime.now().isBefore(sessionClosesAt);
+        return sessionWasOpened() && LocalDateTime.now(BRASILIA_TZ).isBefore(sessionClosesAt);
     }
 
     public boolean sessionIsClosed() {
@@ -57,7 +61,7 @@ public class Agenda {
     }
 
     public void openSession(long durationSeconds) {
-        this.sessionOpenedAt = LocalDateTime.now();
+        this.sessionOpenedAt = LocalDateTime.now(BRASILIA_TZ).toLocalDateTime();
         this.sessionClosesAt = this.sessionOpenedAt.plusSeconds(durationSeconds);
     }
 
