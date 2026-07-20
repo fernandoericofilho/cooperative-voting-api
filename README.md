@@ -429,18 +429,62 @@ INDEX(pautaId)                 -- Para apuração eficiente
 
 ---
 
+## ⚠️ Serviço Externo Offline - Mock Implementado
+
+### Status Atual
+**🔴 Serviço `https://user-info.herokuapp.com` está OFFLINE**
+
+Heroku descontinuou dynos grátis em novembro de 2022. O serviço de validação de elegibilidade (CPF) que era hospedado lá não está mais disponível.
+
+### Solução Implementada
+Para permitir testes e uso da aplicação **sem dependência do serviço externo**, implementamos `MockUserInfoClient`:
+
+**O que mudou:**
+- ✅ Todos os CPFs retornam **HABILITADO (ELIGIBLE)** por padrão
+- ✅ Votos são registrados normalmente
+- ✅ Fluxo completo de votação funciona sem serviço externo
+
+**Configuração:**
+```yaml
+app:
+  mock:
+    enabled: true   # Ativa MockUserInfoClient
+```
+
+**Logs:** Ao registrar um voto, você verá:
+```
+[MOCK] Checking member eligibility: 123.***.***-01 - returning ELIGIBLE
+[MOCK] External service https://user-info.herokuapp.com is OFFLINE - using mock implementation
+```
+
+### Quando Restaurar o Serviço Real
+Quando o serviço externo voltar a estar disponível:
+1. Altere em `application.yml`: `app.mock.enabled: false`
+2. Implemente novamente `WebClientUserInfoClient`
+3. Atualize `app.external.user-info-url` se necessário
+
+**Código:** Ver comentários detalhados em `src/main/java/com/sicredi/voting/services/external/MockUserInfoClient.java`
+
+---
+
 ## 🔐 Decisões Técnicas
 
 ### 1. Integração com Elegibilidade (CPF)
-**Estratégia: Fail-Closed**
+**Estratégia Original: Fail-Closed**
 
-Quando o serviço externo (`https://user-info.herokuapp.com/users/{cpf}`) está indisponível:
-- ❌ NÃO aceita o voto (retorna 503 Service Unavailable)
-- ✅ Prefere rejeitar a favor da integridade de dados
+O design original previa: quando o serviço externo (`https://user-info.herokuapp.com/users/{cpf}`) estava indisponível:
+- ❌ NÃO aceitaria o voto (retornaria 503 Service Unavailable)
+- ✅ Preferia rejeitar a favor da integridade de dados
 
-**Justificativa:** Em uma cooperativa, garantir que apenas associados habilitados votam é crítico. É preferível que o sistema fique temporariamente indisponível a aceitar votos inválidos.
+**Justificativa Original:** Em uma cooperativa, garantir que apenas associados habilitados votam é crítico. É preferível que o sistema fique temporariamente indisponível a aceitar votos inválidos.
 
-**Resiliência:**
+**Adaptação Atual:** Como o serviço está permanentemente offline (descontinuado), usamos `MockUserInfoClient` que:
+- Retorna ELIGIBLE para todos os CPFs
+- Mantém a integridade da arquitetura (interface `UserInfoClient`)
+- Permite uso prático da aplicação
+- É facilmente reversível quando o serviço voltar
+
+**Resiliência (quando estiver online):**
 - Timeout: 3 segundos por request
 - Retry: até 2 tentativas com backoff exponencial
 - Cache: Não é implementado (cada voto consulta fresh)
