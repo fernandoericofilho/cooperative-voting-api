@@ -1,27 +1,23 @@
 package com.sicredi.voting.services.external;
 
 import com.sicredi.voting.enums.VotingStatus;
+import org.springframework.beans.factory.annotation.Value;
 import com.sicredi.voting.exceptions.InvalidCpfException;
 import com.sicredi.voting.exceptions.ExternalIntegrationUnavailableException;
 import com.sicredi.voting.services.util.CpfUtils;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.util.retry.Retry;
 
 @Slf4j
-@Service
 public class WebClientUserInfoClient implements UserInfoClient {
 
     private final WebClient webClient;
     private final Duration timeout;
 
-    @Autowired
     public WebClientUserInfoClient(
         WebClient.Builder webClientBuilder,
         @Value("${app.external.user-info-url}") String baseUrl,

@@ -18,6 +18,8 @@ app:
   external:
     user-info-url: https://user-info.herokuapp.com
     timeout-seconds: 3
+  mock:
+    enabled: true
 
 resilience4j:
   circuitbreaker:
