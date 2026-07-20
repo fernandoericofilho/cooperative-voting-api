@@ -14,11 +14,15 @@ spring:
   flyway:
     enabled: true
 
+# External service configuration
+# NOTE: https://user-info.herokuapp.com is OFFLINE (Heroku deprecated free dynos)
+# Using mock implementation that returns ELIGIBLE for all CPFs
 app:
   external:
     user-info-url: https://user-info.herokuapp.com
     timeout-seconds: 3
   mock:
+    # Set to 'false' when external service is restored
     enabled: true
 
 resilience4j:
