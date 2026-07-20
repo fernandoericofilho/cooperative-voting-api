@@ -45,7 +45,7 @@ public class Agenda {
     public Agenda(String title, String description) {
         this.title = title;
         this.description = description;
-        this.createdAt = LocalDateTime.now(BRASILIA_TZ).toLocalDateTime();
+        this.createdAt = ZonedDateTime.now(BRASILIA_TZ).toLocalDateTime();
     }
 
     public boolean sessionWasOpened() {
@@ -53,7 +53,7 @@ public class Agenda {
     }
 
     public boolean sessionIsOpen() {
-        return sessionWasOpened() && LocalDateTime.now(BRASILIA_TZ).isBefore(sessionClosesAt);
+        return sessionWasOpened() && ZonedDateTime.now(BRASILIA_TZ).toLocalDateTime().isBefore(sessionClosesAt);
     }
 
     public boolean sessionIsClosed() {
@@ -61,7 +61,7 @@ public class Agenda {
     }
 
     public void openSession(long durationSeconds) {
-        this.sessionOpenedAt = LocalDateTime.now(BRASILIA_TZ).toLocalDateTime();
+        this.sessionOpenedAt = ZonedDateTime.now(BRASILIA_TZ).toLocalDateTime();
         this.sessionClosesAt = this.sessionOpenedAt.plusSeconds(durationSeconds);
     }
 
